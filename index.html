@@ -3,1268 +3,3166 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Colección BGG de pezhammer</title>
-
+    <title>BGG Dashboard - pezhammer</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <style>
-      body {
+      :root {
+        --bg-color: #080c14;
+        --card-bg: #121826;
+        --card-border: #1e293b;
+        --card-hover-border: #7c3aed;
+        --accent-purple: #7c3aed;
+        --accent-teal: #0d9488;
+        --text-primary: #f8fafc;
+        --text-secondary: #94a3b8;
+        --glass-bg: rgba(18, 24, 38, 0.7);
+        --glass-border: rgba(255, 255, 255, 0.05);
+      }
+
+      * {
+        box-sizing: border-box;
         margin: 0;
-        font-family:
-          system-ui,
-          -apple-system,
-          BlinkMacSystemFont,
-          "Segoe UI",
-          Roboto,
-          Oxygen,
-          Ubuntu,
-          Cantarell,
-          "Open Sans",
-          "Helvetica Neue",
-          sans-serif;
-        background: #f5f5f5;
-        color: #222;
+        padding: 0;
+      }
+
+      body {
+        background-color: var(--bg-color);
+        background-image: 
+          radial-gradient(at 0% 0%, rgba(13, 148, 136, 0.12) 0px, transparent 40%),
+          radial-gradient(at 100% 100%, rgba(124, 58, 237, 0.12) 0px, transparent 40%);
+        color: var(--text-primary);
+        font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+        min-height: 100vh;
+        padding-bottom: 50px;
+        line-height: 1.5;
+        overflow-x: hidden;
+      }
+
+      /* Custom scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #080c14;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #1e293b;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #7c3aed;
       }
 
       header {
-        background: #1f2937;
-        color: white;
-        padding: 32px;
+        position: relative;
+        padding: 60px 20px 40px;
         text-align: center;
+        background: linear-gradient(180deg, rgba(18, 24, 38, 0.8) 0%, transparent 100%);
+        border-bottom: 1px solid var(--glass-border);
       }
 
-      header strong {
-        color: tomato;
+      header h1 {
+        font-size: 2.8rem;
+        font-weight: 800;
+        letter-spacing: -0.05em;
+        margin-bottom: 8px;
+        background: linear-gradient(to right, #0dd3c5, #a78bfa);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      header h1 strong {
+        font-weight: 800;
+      }
+
+      header p {
+        font-size: 1.1rem;
+        color: var(--text-secondary);
+        font-weight: 300;
       }
 
       .container {
-        width: 92%;
-        max-width: 1100px;
+        width: 95%;
+        max-width: 1300px;
         margin: auto;
-        padding: 24px;
+        padding: 24px 10px;
       }
 
-      .year-block {
+      /* Stats Dashboard */
+      .stats-panel {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 20px;
         margin-bottom: 40px;
       }
 
-      .year-title {
+      .stat-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid var(--glass-border);
+        border-radius: 16px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        transition: transform 0.3s ease, border-color 0.3s ease;
+      }
+
+      .stat-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(124, 58, 237, 0.3);
+      }
+
+      .stat-icon {
         font-size: 2rem;
-        margin-bottom: 16px;
-        border-left: 8px solid #374151;
-        padding-left: 12px;
-      }
-
-      .games-list {
-        background: white;
+        padding: 12px;
         border-radius: 12px;
-        padding: 12px 20px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        background: rgba(255, 255, 255, 0.03);
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
 
-      .game-row {
+      .stat-card:nth-child(1) .stat-icon { color: #0d9488; }
+      .stat-card:nth-child(2) .stat-icon { color: #7c3aed; }
+      .stat-card:nth-child(3) .stat-icon { color: #3b82f6; }
+      .stat-card:nth-child(4) .stat-icon { color: #eab308; }
+
+      .stat-info .stat-val {
+        font-size: 1.8rem;
+        font-weight: 700;
+        line-height: 1.2;
+      }
+
+      .stat-info .stat-label {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 500;
+      }
+
+      /* Controls Panel */
+      .controls-bar {
+        background: var(--glass-bg);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 24px;
+        margin-bottom: 30px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .controls-row-main {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr;
+        gap: 16px;
+      }
+
+      @media (max-width: 900px) {
+        .controls-row-main {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      @media (max-width: 600px) {
+        .controls-row-main {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+
+      .input-icon {
+        position: absolute;
+        left: 14px;
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+      }
+
+      .search-input {
+        width: 100%;
+        padding: 12px 12px 12px 42px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        color: var(--text-primary);
+        font-family: inherit;
+        font-size: 0.95rem;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      .search-input:focus {
+        outline: none;
+        border-color: var(--accent-purple);
+        box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+      }
+
+      .select-input {
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        color: var(--text-primary);
+        font-family: inherit;
+        font-size: 0.95rem;
+        cursor: pointer;
+        width: 100%;
+        transition: border-color 0.3s, box-shadow 0.3s;
+      }
+
+      .select-input:focus {
+        outline: none;
+        border-color: var(--accent-teal);
+        box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+      }
+
+      .select-input option {
+        background: #111827;
+        color: var(--text-primary);
+      }
+
+      .tag-filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .tag-label {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+        margin-right: 6px;
+      }
+
+      .filter-tag {
+        padding: 6px 14px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .filter-tag:hover {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text-primary);
+      }
+
+      .filter-tag.active {
+        background: linear-gradient(135deg, var(--accent-purple), #9061f9);
+        border-color: var(--accent-purple);
+        color: white;
+        box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
+      }
+
+      .view-toggle-btn {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: var(--text-secondary);
+        padding: 12px 18px;
+        border-radius: 12px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: inherit;
+        font-size: 0.95rem;
+        font-weight: 500;
+        transition: all 0.3s;
+      }
+
+      .view-toggle-btn:hover {
+        border-color: var(--text-secondary);
+        color: var(--text-primary);
+      }
+
+      /* Games Count Summary */
+      .count-summary {
+        margin-bottom: 24px;
+        font-size: 0.95rem;
+        color: var(--text-secondary);
         display: flex;
         justify-content: space-between;
-        padding: 10px 0;
-        border-bottom: 1px solid #e5e7eb;
+        align-items: center;
       }
 
-      .game-row:last-child {
-        border-bottom: none;
+      .count-summary span strong {
+        color: var(--text-primary);
       }
 
-      .game-name {
+      /* Games Grid Layout */
+      .games-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 28px;
+        transition: all 0.3s;
+      }
+
+      .game-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 20px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s, box-shadow 0.35s;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      .game-card:hover {
+        transform: translateY(-8px);
+        border-color: var(--card-hover-border);
+        box-shadow: 0 12px 30px rgba(124, 58, 237, 0.15);
+      }
+
+      /* Game Image */
+      .game-img-container {
+        aspect-ratio: 1;
+        width: 100%;
+        background: #0d111a;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      }
+
+      .game-img {
+        width: 90%;
+        height: 90%;
+        object-fit: contain;
+        transition: transform 0.5s ease;
+      }
+
+      .game-card:hover .game-img {
+        transform: scale(1.06);
+      }
+
+      /* Overlay Badges */
+      .year-badge {
+        position: absolute;
+        top: 14px;
+        left: 14px;
+        background: rgba(15, 23, 42, 0.8);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 4px 10px;
+        border-radius: 30px;
+        font-size: 0.8rem;
         font-weight: 600;
+        color: #cbd5e1;
       }
 
-      .game-year {
-        color: #666;
+      .rating-badge {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        padding: 4px 10px;
+        border-radius: 30px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        backdrop-filter: blur(8px);
       }
 
+      /* Rating Color Grading */
+      .rating-high {
+        background: rgba(16, 185, 129, 0.15);
+        color: #34d399;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+      }
+      .rating-medium {
+        background: rgba(45, 212, 191, 0.15);
+        color: #2dd4bf;
+        border: 1px solid rgba(45, 212, 191, 0.3);
+      }
+      .rating-low {
+        background: rgba(245, 158, 11, 0.15);
+        color: #fbbf24;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+      }
+      .rating-poor {
+        background: rgba(239, 68, 68, 0.15);
+        color: #f87171;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+      }
+
+      /* Card Content */
+      .game-details {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+      }
+
+      .game-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 12px;
+        line-height: 1.3;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        height: 2.6rem;
+      }
+
+      .game-specs {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: auto;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        padding-top: 12px;
+      }
+
+      .spec-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+      }
+
+      .spec-icon {
+        font-size: 1rem;
+        width: 16px;
+        text-align: center;
+      }
+
+      /* List View styling */
+      .games-list-view {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .games-list-view .game-card {
+        flex-direction: row;
+        height: 100px;
+        align-items: center;
+        padding: 10px 24px;
+      }
+
+      .games-list-view .game-img-container {
+        width: 80px;
+        height: 80px;
+        aspect-ratio: auto;
+        border-radius: 12px;
+        border: none;
+      }
+
+      .games-list-view .game-details {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 0 0 20px;
+        flex-grow: 1;
+        width: 100%;
+      }
+
+      .games-list-view .game-title {
+        margin-bottom: 0;
+        height: auto;
+        max-width: 40%;
+        -webkit-line-clamp: 1;
+        font-size: 1.15rem;
+      }
+
+      .games-list-view .year-badge {
+        position: static;
+        margin-right: 12px;
+      }
+
+      .games-list-view .rating-badge {
+        position: static;
+      }
+
+      .games-list-view .game-specs {
+        flex-direction: row;
+        gap: 24px;
+        margin-top: 0;
+        border-top: none;
+        padding-top: 0;
+        align-items: center;
+      }
+
+      @media (max-width: 800px) {
+        .games-list-view .game-card {
+          flex-direction: column;
+          height: auto;
+          align-items: stretch;
+          padding: 20px;
+        }
+        .games-list-view .game-img-container {
+          width: 100%;
+          height: 180px;
+        }
+        .games-list-view .game-details {
+          flex-direction: column;
+          align-items: stretch;
+          padding: 16px 0 0 0;
+        }
+        .games-list-view .game-title {
+          max-width: 100%;
+          margin-bottom: 12px;
+        }
+        .games-list-view .game-specs {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 8px;
+          border-top: 1px solid rgba(255, 255, 255, 0.05);
+          padding-top: 12px;
+        }
+      }
+
+      /* Empty State */
+      .empty-state {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 80px 20px;
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        color: var(--text-secondary);
+      }
+
+      .empty-state h3 {
+        color: var(--text-primary);
+        font-size: 1.4rem;
+        margin-bottom: 10px;
+      }
+
+      /* Footer */
       footer {
         text-align: center;
-        padding: 30px;
-        color: #666;
+        padding: 40px 20px;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        font-weight: 300;
+        border-top: 1px solid var(--glass-border);
+        margin-top: 60px;
+        background: linear-gradient(0deg, rgba(18, 24, 38, 0.4) 0%, transparent 100%);
+      }
+      
+      footer strong {
+        color: var(--accent-teal);
+        font-weight: 500;
       }
     </style>
   </head>
 
   <body>
     <header>
-      <h1>Colección de BoardGameGeek de <strong>pezhammer</strong></h1>
-      <p>Juegos base ordenados cronológicamente</p>
+      <h1>Colección BGG de <strong>pezhammer</strong></h1>
+      <p>Juegos de mesa base organizados de forma interactiva</p>
     </header>
 
     <div class="container">
-      <section class="year-block">
-        <div class="year-title">1970</div>
-        <div class="games-list">
-          <div class="game-row">
-            <div class="game-name">PanzerBlitz</div>
-            <div class="game-year">1970</div>
+      <!-- Stats Panel -->
+      <section class="stats-panel">
+        <div class="stat-card">
+          <div class="stat-icon">🎲</div>
+          <div class="stat-info">
+            <div class="stat-val" id="stat-total-games">-</div>
+            <div class="stat-label">Total Juegos</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">⏳</div>
+          <div class="stat-info">
+            <div class="stat-val" id="stat-timeline">-</div>
+            <div class="stat-label">Años de Rango</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">⭐</div>
+          <div class="stat-info">
+            <div class="stat-val" id="stat-avg-rating">-</div>
+            <div class="stat-label">Nota Media BGG</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">👥</div>
+          <div class="stat-info">
+            <div class="stat-val" id="stat-solo-friendly">-</div>
+            <div class="stat-label">Juegos Solitario</div>
           </div>
         </div>
       </section>
 
-      <section class="year-block">
-        <div class="year-title">1974</div>
-        <div class="games-list">
-          <div class="game-row">
-            <div class="game-name">The Russian Campaign</div>
-            <div class="game-year">1974</div>
+      <!-- Controls Panel -->
+      <section class="controls-bar">
+        <div class="controls-row-main">
+          <!-- Search input -->
+          <div class="input-wrapper">
+            <span class="input-icon">🔍</span>
+            <input type="text" id="search-input" class="search-input" placeholder="Buscar juego por nombre..." />
           </div>
+
+          <!-- Sort dropdown -->
+          <select id="sort-select" class="select-input">
+            <option value="year-asc">Año: Más antiguos primero</option>
+            <option value="year-desc">Año: Más recientes primero</option>
+            <option value="name-asc">Nombre: A - Z</option>
+            <option value="name-desc">Nombre: Z - A</option>
+            <option value="rating-desc">Nota BGG: Más alta primero</option>
+          </select>
+
+          <!-- Players Filter -->
+          <select id="players-select" class="select-input">
+            <option value="all">Cualquier Nº Jugadores</option>
+            <option value="1">Solo 1 Jugador (Solitario)</option>
+            <option value="2">2 Jugadores</option>
+            <option value="3">3 Jugadores</option>
+            <option value="4">4+ Jugadores</option>
+          </select>
+
+          <!-- View Toggle -->
+          <button id="view-toggle" class="view-toggle-btn">
+            <span id="view-toggle-icon">▤</span>
+            <span id="view-toggle-text">Vista Lista</span>
+          </button>
+        </div>
+
+        <!-- Tag Quick Filters -->
+        <div class="tag-filters">
+          <span class="tag-label">Filtros Rápidos:</span>
+          <button class="filter-tag active" data-filter="all">Todos</button>
+          <button class="filter-tag" data-filter="solo">Solitarios</button>
+          <button class="filter-tag" data-filter="highly-rated">Top Valorados (≥ 7.8)</button>
+          <button class="filter-tag" data-filter="classic">Clásicos (< 2010)</button>
+          <button class="filter-tag" data-filter="modern">Modernos (≥ 2020)</button>
+          <button class="filter-tag" data-filter="short">Partidas Cortas (≤ 45 min)</button>
+          <button class="filter-tag" data-filter="long">Partidas Largas (≥ 90 min)</button>
         </div>
       </section>
 
-      <section class="year-block">
-        <div class="year-title">1977</div>
-        <div class="games-list">
-          <div class="game-row">
-            <div class="game-name">Flat Top</div>
-            <div class="game-year">1977</div>
-          </div>
-        </div>
-      </section>
-
-      <section class="year-block">
-        <div class="year-title">1979</div>
-        <div class="games-list">
-          <div class="game-row">
-            <div class="game-name">Magic Realm</div>
-            <div class="game-year">1979</div>
-          </div>
-        </div>
-      </section>
-
-      <section class="year-block">
-        <div class="year-title">1980</div>
-        <div class="games-list">
-          <div class="game-row">
-            <div class="game-name">Civilization</div>
-            <div class="game-year">1980</div>
-          </div>
-        </div>
-      </section>
-
-      <section class="year-block">
-        <div class="year-title">1981</div>
-        <div class="games-list">
-          <div class="game-row">
-            <div class="game-name">La Guerra Civil Española (1936)</div>
-            <div class="game-year">1981</div>
-          </div>
-        </div>
-      </section>
-
-      <section class="year-block">
-        <div class="year-title">1982</div>
-        <div class="games-list">
-          <div class="game-row">
-            <div class="game-name">El Día Más Largo</div>
-            <div class="game-year">1982</div>
-          </div>
-        </div>
-      </section>
-
-      <section class="year-block">
-        <div class="year-title">1983</div>
-        <div class="games-list">
-          <div class="game-row">
-            <div class="game-name">Ambush!</div>
-            <div class="game-year">1983</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Gulf Strike</div>
-            <div class="game-year">1983</div>
-          </div>
-        </div>
-      </section>
-
-      <section class="year-block">
-        <div class="year-title">1984</div>
-        <div class="games-list">
-          <div class="game-row">
-            <div class="game-name">El Duelo de las Águilas</div>
-            <div class="game-year">1984</div>
-          </div>
-        </div>
-      </section>
-
-      <section class="year-block">
-        <div class="year-title">1987</div>
-        <div class="games-list">
-          <div class="game-row">
-            <div class="game-name">Raid on St. Nazaire</div>
-            <div class="game-year">1987</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Thunder at Cassino</div>
-            <div class="game-year">1987</div>
-          </div>
-        </div>
-      </section>
-
-      <section class="year-block">
-        <div class="year-title">1988</div>
-        <div class="games-list">
-          <div class="game-row">
-            <div class="game-name">Blood Bowl (Second Edition)</div>
-            <div class="game-year">1988</div>
-          </div>
-        </div>
-      </section>
-
-      <section class="year-block">
-        <div class="year-title">1989</div>
-        <div class="games-list">
-          <div class="game-row">
-            <div class="game-name">The Siege of Jerusalem (Third Edition)</div>
-            <div class="game-year">1989</div>
-          </div>
-        </div>
-      </section>
-
-      <section class="year-block">
-        <div class="year-title">2000</div>
-        <div class="games-list">
-          <div class="game-row">
-            <div class="game-name">Carcassonne</div>
-            <div class="game-year">2000</div>
-          </div>
-        </div>
-      </section>
-
-      <section class="year-block">
-        <div class="year-title">2005</div>
-        <div class="games-list">
-          <div class="game-row">
-            <div class="game-name">Arkham Horror</div>
-            <div class="game-year">2005</div>
-          </div>
-        </div>
-      </section>
-
-      <section class="year-block">
-        <div class="year-title">2008</div>
-        <div class="games-list">
-          <div class="game-row">
-            <div class="game-name">Le Havre</div>
-            <div class="game-year">2008</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Pandemic</div>
-            <div class="game-year">2008</div>
-          </div>
-        </div>
-      </section>
-
-      <section class="year-block">
-        <div class="year-title">2009</div>
-        <div class="games-list">
-          <div class="game-row">
-            <div class="game-name">At the Gates of Loyang</div>
-            <div class="game-year">2009</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">D-Day at Omaha Beach</div>
-            <div class="game-year">2009</div>
-          </div>
-        </div>
-      </section>
-
-      <section class="year-block">
-        <div class="year-title">2010</div>
-        <div class="games-list">
-          <div class="game-row">
-            <div class="game-name">Space Hulk: Death Angel – The Card Game</div>
-            <div class="game-year">2010</div>
-          </div>
-        </div>
-      </section>
-
-      <section class="year-block">
-        <div class="year-title">2011</div>
-        <div class="games-list">
-          <div class="game-row">
-            <div class="game-name">Friday</div>
-            <div class="game-year">2011</div>
-          </div>
-        </div>
-      </section>
-
-      <section class="year-block">
-        <div class="year-title">2013</div>
-        <div class="games-list">
-          <div class="game-row">
-            <div class="game-name">Concordia</div>
-            <div class="game-year">2013</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Eldritch Horror</div>
-            <div class="game-year">2013</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Lewis Clark: The Expedition</div>
-            <div class="game-year">2013</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Maquis</div>
-            <div class="game-year">2013</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Sushi Go!</div>
-            <div class="game-year">2013</div>
-          </div>
-        </div>
-      </section>
-
-      <section class="year-block">
-        <div class="year-title">2015</div>
-        <div class="games-list">
-          <div class="game-row">
-            <div class="game-name">Coffee Roaster</div>
-            <div class="game-year">2015</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Tetrarchia</div>
-            <div class="game-year">2015</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">The Bloody Inn</div>
-            <div class="game-year">2015</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Tiny Epic Galaxies</div>
-            <div class="game-year">2015</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Viticulture Essential Edition</div>
-            <div class="game-year">2015</div>
-          </div>
-        </div>
-      </section>
-
-      <section class="year-block">
-        <div class="year-title">2016</div>
-        <div class="games-list">
-          <div class="game-row">
-            <div class="game-name">A Feast for Odin</div>
-            <div class="game-year">2016</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Aeon&#x27;s End</div>
-            <div class="game-year">2016</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Agricola (Revised Edition)</div>
-            <div class="game-year">2016</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Arkham Horror: The Card Game</div>
-            <div class="game-year">2016</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Dawn of the Zeds (Third Edition)</div>
-            <div class="game-year">2016</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Hit Z Road</div>
-            <div class="game-year">2016</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">One Deck Dungeon</div>
-            <div class="game-year">2016</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Reign of Cthulhu</div>
-            <div class="game-year">2016</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Roll Player</div>
-            <div class="game-year">2016</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Scythe</div>
-            <div class="game-year">2016</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Terraforming Mars</div>
-            <div class="game-year">2016</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">
-              Warfighter: The WWII Tactical Combat Card Game
-            </div>
-            <div class="game-year">2016</div>
-          </div>
-        </div>
-      </section>
-
-      <section class="year-block">
-        <div class="year-title">2017</div>
-        <div class="games-list">
-          <div class="game-row">
-            <div class="game-name">After the Virus</div>
-            <div class="game-year">2017</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Anachrony</div>
-            <div class="game-year">2017</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Gaia Project</div>
-            <div class="game-year">2017</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Mint Works</div>
-            <div class="game-year">2017</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Nemo&#x27;s War (Second Edition)</div>
-            <div class="game-year">2017</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Nusfjord</div>
-            <div class="game-year">2017</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">One Deck Dungeon: Forest of Shadows</div>
-            <div class="game-year">2017</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Pocket Mars</div>
-            <div class="game-year">2017</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Spirit Island</div>
-            <div class="game-year">2017</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">The Lost Expedition</div>
-            <div class="game-year">2017</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">This War of Mine: The Board Game</div>
-            <div class="game-year">2017</div>
-          </div>
-        </div>
-      </section>
-
-      <section class="year-block">
-        <div class="year-title">2018</div>
-        <div class="games-list">
-          <div class="game-row">
-            <div class="game-name">Architects of the West Kingdom</div>
-            <div class="game-year">2018</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Arkham Horror (Third Edition)</div>
-            <div class="game-year">2018</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">AuZtralia</div>
-            <div class="game-year">2018</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Cahoots</div>
-            <div class="game-year">2018</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Crown of Emara</div>
-            <div class="game-year">2018</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">CuBirds</div>
-            <div class="game-year">2018</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Dice Settlers</div>
-            <div class="game-year">2018</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Everdell</div>
-            <div class="game-year">2018</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Obsession</div>
-            <div class="game-year">2018</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Orchard: 9 card solitaire game</div>
-            <div class="game-year">2018</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Pavlov&#x27;s House</div>
-            <div class="game-year">2018</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Soviet Kitchen Unleashed</div>
-            <div class="game-year">2018</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Sprawlopolis</div>
-            <div class="game-year">2018</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Teotihuacan: City of Gods</div>
-            <div class="game-year">2018</div>
-          </div>
-        </div>
-      </section>
-
-      <section class="year-block">
-        <div class="year-title">2019</div>
-        <div class="games-list">
-          <div class="game-row">
-            <div class="game-name">Aftermath</div>
-            <div class="game-year">2019</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Cooper Island</div>
-            <div class="game-year">2019</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Cthulhu: Death May Die</div>
-            <div class="game-year">2019</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">D-Day Dice (Second Edition)</div>
-            <div class="game-year">2019</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Dreamscape</div>
-            <div class="game-year">2019</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Fantastic Factories</div>
-            <div class="game-year">2019</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">
-              Hearts and Minds: Vietnam 1965-1975 (Third Edition)
-            </div>
-            <div class="game-year">2019</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Horrified</div>
-            <div class="game-year">2019</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">It&#x27;s a Wonderful World</div>
-            <div class="game-year">2019</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Maracaibo</div>
-            <div class="game-year">2019</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">MOON</div>
-            <div class="game-year">2019</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">PARKS</div>
-            <div class="game-year">2019</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Star Wars: Outer Rim</div>
-            <div class="game-year">2019</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">The 7th Continent: Classic Edition</div>
-            <div class="game-year">2019</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">The Castles of Burgundy</div>
-            <div class="game-year">2019</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">The Isle of Cats</div>
-            <div class="game-year">2019</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Undaunted: Normandy</div>
-            <div class="game-year">2019</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Villagers</div>
-            <div class="game-year">2019</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Volfyirion</div>
-            <div class="game-year">2019</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Wingspan</div>
-            <div class="game-year">2019</div>
-          </div>
-        </div>
-      </section>
-
-      <section class="year-block">
-        <div class="year-title">2020</div>
-        <div class="games-list">
-          <div class="game-row">
-            <div class="game-name">Anno 1800: The Board Game</div>
-            <div class="game-year">2020</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Café</div>
-            <div class="game-year">2020</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Dune: Imperium</div>
-            <div class="game-year">2020</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Gloomhaven: Jaws of the Lion</div>
-            <div class="game-year">2020</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Kanban EV</div>
-            <div class="game-year">2020</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Lost Ruins of Arnak</div>
-            <div class="game-year">2020</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Mini Rogue</div>
-            <div class="game-year">2020</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Paleo</div>
-            <div class="game-year">2020</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Paper Dungeons: A Dungeon Scrawler Game</div>
-            <div class="game-year">2020</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Port Arthur</div>
-            <div class="game-year">2020</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Regicide</div>
-            <div class="game-year">2020</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Roll Raid</div>
-            <div class="game-year">2020</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Solar Storm</div>
-            <div class="game-year">2020</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">The LOOP</div>
-            <div class="game-year">2020</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">The Ming Voyages</div>
-            <div class="game-year">2020</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">The Red Cathedral</div>
-            <div class="game-year">2020</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Tiny Epic Dinosaurs</div>
-            <div class="game-year">2020</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Tranquility</div>
-            <div class="game-year">2020</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Undaunted: North Africa</div>
-            <div class="game-year">2020</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Village Green</div>
-            <div class="game-year">2020</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Viscounts of the West Kingdom</div>
-            <div class="game-year">2020</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Warp&#x27;s Edge</div>
-            <div class="game-year">2020</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Wild Space</div>
-            <div class="game-year">2020</div>
-          </div>
-        </div>
-      </section>
-
-      <section class="year-block">
-        <div class="year-title">2021</div>
-        <div class="games-list">
-          <div class="game-row">
-            <div class="game-name">Agropolis</div>
-            <div class="game-year">2021</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Ark Nova</div>
-            <div class="game-year">2021</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Bitoku</div>
-            <div class="game-year">2021</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Bloodborne: The Board Game</div>
-            <div class="game-year">2021</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Codex Naturalis</div>
-            <div class="game-year">2021</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Death Valley</div>
-            <div class="game-year">2021</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Eila and Something Shiny</div>
-            <div class="game-year">2021</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Final Girl</div>
-            <div class="game-year">2021</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">For Northwood! A Solo Trick-Taking Game</div>
-            <div class="game-year">2021</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Great Western Trail: Second Edition</div>
-            <div class="game-year">2021</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Imperium: Classics</div>
-            <div class="game-year">2021</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Imperium: Legends</div>
-            <div class="game-year">2021</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Meadow</div>
-            <div class="game-year">2021</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Merchants Cove</div>
-            <div class="game-year">2021</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Mini Express</div>
-            <div class="game-year">2021</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Oltréé</div>
-            <div class="game-year">2021</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">One Card Dungeon</div>
-            <div class="game-year">2021</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Sleeping Gods</div>
-            <div class="game-year">2021</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Stroganov</div>
-            <div class="game-year">2021</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Tiny Epic Dungeons</div>
-            <div class="game-year">2021</div>
-          </div>
-        </div>
-      </section>
-
-      <section class="year-block">
-        <div class="year-title">2022</div>
-        <div class="games-list">
-          <div class="game-row">
-            <div class="game-name">1212 Las Navas de Tolosa</div>
-            <div class="game-year">2022</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Ascension: 10 Year Anniversary Edition</div>
-            <div class="game-year">2022</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Carnegie</div>
-            <div class="game-year">2022</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Creature Comforts</div>
-            <div class="game-year">2022</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Discordia</div>
-            <div class="game-year">2022</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Dorfromantik: The Board Game</div>
-            <div class="game-year">2022</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Endless Winter: Paleoamericans</div>
-            <div class="game-year">2022</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Flamecraft</div>
-            <div class="game-year">2022</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Frostpunk: The Board Game</div>
-            <div class="game-year">2022</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Galdor&#x27;s Grip</div>
-            <div class="game-year">2022</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Massive Darkness 2: Hellscape</div>
-            <div class="game-year">2022</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Resist!</div>
-            <div class="game-year">2022</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Revive</div>
-            <div class="game-year">2022</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Sabika</div>
-            <div class="game-year">2022</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Skymines</div>
-            <div class="game-year">2022</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">The Guild of Merchant Explorers</div>
-            <div class="game-year">2022</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Three Sisters</div>
-            <div class="game-year">2022</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Tiletum</div>
-            <div class="game-year">2022</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Unreliable Wizard</div>
-            <div class="game-year">2022</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Votes for Women</div>
-            <div class="game-year">2022</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Wayfarers of the South Tigris</div>
-            <div class="game-year">2022</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Wreckland Run</div>
-            <div class="game-year">2022</div>
-          </div>
-        </div>
-      </section>
-
-      <section class="year-block">
-        <div class="year-title">2023</div>
-        <div class="games-list">
-          <div class="game-row">
-            <div class="game-name">3 Ring Circus</div>
-            <div class="game-year">2023</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Barcelona</div>
-            <div class="game-year">2023</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">
-              Battles of Napoleonic Europe: A Solitaire Wargame
-            </div>
-            <div class="game-year">2023</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Beacon Patrol</div>
-            <div class="game-year">2023</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Darwin&#x27;s Journey</div>
-            <div class="game-year">2023</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Doggerland</div>
-            <div class="game-year">2023</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Earth</div>
-            <div class="game-year">2023</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Fictions: Memoirs of a Gangster</div>
-            <div class="game-year">2023</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Fliptown</div>
-            <div class="game-year">2023</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Goblin Vaults</div>
-            <div class="game-year">2023</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Halls of Hegra</div>
-            <div class="game-year">2023</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Hickory Dickory</div>
-            <div class="game-year">2023</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Isle of Trains: All Aboard</div>
-            <div class="game-year">2023</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Legacy of Yu</div>
-            <div class="game-year">2023</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">ONUS!: Traianus</div>
-            <div class="game-year">2023</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">The White Castle</div>
-            <div class="game-year">2023</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Tiny Epic Vikings</div>
-            <div class="game-year">2023</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Voidfall</div>
-            <div class="game-year">2023</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Witchcraft!</div>
-            <div class="game-year">2023</div>
-          </div>
-        </div>
-      </section>
-
-      <section class="year-block">
-        <div class="year-title">2024</div>
-        <div class="games-list">
-          <div class="game-row">
-            <div class="game-name">Conservas</div>
-            <div class="game-year">2024</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Creature Caravan</div>
-            <div class="game-year">2024</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">
-              Cthulhu: Death May Die – Fear of the Unknown
-            </div>
-            <div class="game-year">2024</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">El Rey Planeta</div>
-            <div class="game-year">2024</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Endeavor: Deep Sea</div>
-            <div class="game-year">2024</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">FateFlip: Washed Ashore</div>
-            <div class="game-year">2024</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Flatiron</div>
-            <div class="game-year">2024</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Gloomhaven: Buttons Bugs</div>
-            <div class="game-year">2024</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Harmonies</div>
-            <div class="game-year">2024</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Harmony</div>
-            <div class="game-year">2024</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Hispania</div>
-            <div class="game-year">2024</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Imperium: Horizons</div>
-            <div class="game-year">2024</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Leviathan Wilds</div>
-            <div class="game-year">2024</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Men-Nefer</div>
-            <div class="game-year">2024</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Neko Syndicate</div>
-            <div class="game-year">2024</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Reforest</div>
-            <div class="game-year">2024</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Saltfjord</div>
-            <div class="game-year">2024</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Salton Sea</div>
-            <div class="game-year">2024</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Slay the Spire: The Board Game</div>
-            <div class="game-year">2024</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Stonespine Architects</div>
-            <div class="game-year">2024</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Strange World Above the Clouds</div>
-            <div class="game-year">2024</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">The Last Lighthouse</div>
-            <div class="game-year">2024</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">The Other Side of the Hill</div>
-            <div class="game-year">2024</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Unconscious Mind</div>
-            <div class="game-year">2024</div>
-          </div>
-        </div>
-      </section>
-
-      <section class="year-block">
-        <div class="year-title">2025</div>
-        <div class="games-list">
-          <div class="game-row">
-            <div class="game-name">A Wild Venture</div>
-            <div class="game-year">2025</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Adamastor</div>
-            <div class="game-year">2025</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">FateFlip: By Royal Decree</div>
-            <div class="game-year">2025</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Onoda</div>
-            <div class="game-year">2025</div>
-          </div>
-
-          <div class="game-row">
-            <div class="game-name">Valpiedra: Descensus ad tenebras</div>
-            <div class="game-year">2025</div>
-          </div>
-        </div>
+      <!-- Count Header -->
+      <div class="count-summary">
+        <span id="showing-summary">Mostrando <strong>-</strong> de <strong>-</strong> juegos</span>
+      </div>
+
+      <!-- Games List Grid -->
+      <section id="games-container" class="games-grid">
+        <!-- Rendered dynamically via JS -->
       </section>
     </div>
 
     <footer>
-      Generado automáticamente a partir del XML exportado de BoardGameGeek.
+      Generado automáticamente a partir del XML de BoardGameGeek. Diseñado con <strong>Aesthetics Premium</strong>.
     </footer>
+
+    <!-- Injected Game Data -->
+    <script>
+      const gamesData = [
+  {
+    "id": "2238",
+    "name": "PanzerBlitz",
+    "year": 1970,
+    "thumbnail": "https://cf.geekdo-images.com/yvfl8crLxWbcW9DW7dQK_g__small/img/mi2uaqoK-pTaP_ktcvqWxCjhxXQ=/fit-in/200x150/filters:strip_icc()/pic2092423.png",
+    "image": "https://cf.geekdo-images.com/yvfl8crLxWbcW9DW7dQK_g__original/img/Z-YmL2soYgvAOkUS8NsTVFd1BDw=/0x0/filters:format(png)/pic2092423.png",
+    "minplayers": 2,
+    "maxplayers": 2,
+    "playingtime": 90,
+    "rating": 6.6
+  },
+  {
+    "id": "2808",
+    "name": "The Russian Campaign",
+    "year": 1974,
+    "thumbnail": "https://cf.geekdo-images.com/qEwwon5ERmotUq3BY6aykQ__small/img/-So-aDmCXSXoSdx84YRWBfjO0-U=/fit-in/200x150/filters:strip_icc()/pic5967170.jpg",
+    "image": "https://cf.geekdo-images.com/qEwwon5ERmotUq3BY6aykQ__original/img/JTkMowCT4PEANZoEVp2Mg5aBt1A=/0x0/filters:format(jpeg)/pic5967170.jpg",
+    "minplayers": 2,
+    "maxplayers": 2,
+    "playingtime": 360,
+    "rating": 7.3
+  },
+  {
+    "id": "2529",
+    "name": "Flat Top",
+    "year": 1977,
+    "thumbnail": "https://cf.geekdo-images.com/U4aLOWpOLNtUjQ5BirlGLA__small/img/thPXwIIE3knD9igpLusCdeHVsMI=/fit-in/200x150/filters:strip_icc()/pic806423.jpg",
+    "image": "https://cf.geekdo-images.com/U4aLOWpOLNtUjQ5BirlGLA__original/img/5m1hrtRgt6lst9tajA4o169D4wA=/0x0/filters:format(jpeg)/pic806423.jpg",
+    "minplayers": 2,
+    "maxplayers": 2,
+    "playingtime": 360,
+    "rating": 7.4
+  },
+  {
+    "id": "22",
+    "name": "Magic Realm",
+    "year": 1979,
+    "thumbnail": "https://cf.geekdo-images.com/X-wQkavJHlZaUqlL1ClEsA__small/img/UIw4ZFZqMTqMlArymmHI591Gm-k=/fit-in/200x150/filters:strip_icc()/pic148345.jpg",
+    "image": "https://cf.geekdo-images.com/X-wQkavJHlZaUqlL1ClEsA__original/img/VSzycwqmBGWE5aDokPi1aR57WUo=/0x0/filters:format(jpeg)/pic148345.jpg",
+    "minplayers": 1,
+    "maxplayers": 16,
+    "playingtime": 240,
+    "rating": 7.3
+  },
+  {
+    "id": "71",
+    "name": "Civilization",
+    "year": 1980,
+    "thumbnail": "https://cf.geekdo-images.com/tUdVpt5daNITDrLXqN931Q__small/img/AI7xWgZxUCdXZHPH5WXCXWSAKUI=/fit-in/200x150/filters:strip_icc()/pic114473.jpg",
+    "image": "https://cf.geekdo-images.com/tUdVpt5daNITDrLXqN931Q__original/img/121amP5yjflTHIFW017EGPe5Rjk=/0x0/filters:format(jpeg)/pic114473.jpg",
+    "minplayers": 2,
+    "maxplayers": 7,
+    "playingtime": 360,
+    "rating": 7.5
+  },
+  {
+    "id": "22644",
+    "name": "La Guerra Civil Española (1936)",
+    "year": 1981,
+    "thumbnail": "https://cf.geekdo-images.com/gFYa-m9tubZAJXHfsr7Frg__small/img/ggWEp4aZc8JtUMtOAh82eapBtwU=/fit-in/200x150/filters:strip_icc()/pic331333.jpg",
+    "image": "https://cf.geekdo-images.com/gFYa-m9tubZAJXHfsr7Frg__original/img/KF3VqS8xGO_OvbEn8d0izLvH5vg=/0x0/filters:format(jpeg)/pic331333.jpg",
+    "minplayers": 2,
+    "maxplayers": 6,
+    "playingtime": 240,
+    "rating": 6.0
+  },
+  {
+    "id": "18780",
+    "name": "El Día Más Largo",
+    "year": 1982,
+    "thumbnail": "https://cf.geekdo-images.com/gBQLcnnQ6dkgC2k7NE1c5g__small/img/zw0jnRu-i4h9W72ccsH-fio-6eI=/fit-in/200x150/filters:strip_icc()/pic1143963.jpg",
+    "image": "https://cf.geekdo-images.com/gBQLcnnQ6dkgC2k7NE1c5g__original/img/SlCDr3G_fQ-07NvqUCIaq7IBWiM=/0x0/filters:format(jpeg)/pic1143963.jpg",
+    "minplayers": 2,
+    "maxplayers": 4,
+    "playingtime": 240,
+    "rating": 6.0
+  },
+  {
+    "id": "1608",
+    "name": "Ambush!",
+    "year": 1983,
+    "thumbnail": "https://cf.geekdo-images.com/8H-hiPuWsdD07fcj0kMsYA__small/img/QxDn57ooLqX29aWH3ThD0agawOA=/fit-in/200x150/filters:strip_icc()/pic265524.jpg",
+    "image": "https://cf.geekdo-images.com/8H-hiPuWsdD07fcj0kMsYA__original/img/pA8C9Vf-DY687SR5oKSgFRLSz0A=/0x0/filters:format(jpeg)/pic265524.jpg",
+    "minplayers": 1,
+    "maxplayers": 1,
+    "playingtime": 240,
+    "rating": 7.5
+  },
+  {
+    "id": "2076",
+    "name": "Gulf Strike",
+    "year": 1983,
+    "thumbnail": "https://cf.geekdo-images.com/MGwZeYmzl4yZ5-E-KeZ4hQ__small/img/OuTDYPI6h1ZEG0lSLuwwu3_wV44=/fit-in/200x150/filters:strip_icc()/pic147586.jpg",
+    "image": "https://cf.geekdo-images.com/MGwZeYmzl4yZ5-E-KeZ4hQ__original/img/E9iWUeTf1v3_UIhzb4i7E_QJ2os=/0x0/filters:format(jpeg)/pic147586.jpg",
+    "minplayers": 2,
+    "maxplayers": 2,
+    "playingtime": 360,
+    "rating": 6.7
+  },
+  {
+    "id": "25255",
+    "name": "El Duelo de las Águilas",
+    "year": 1984,
+    "thumbnail": "https://cf.geekdo-images.com/ON3foDN0Rpnig6vmuP5Mhg__small/img/KtOFz4t_08m1ZJeeLr2p0JY3n7Y=/fit-in/200x150/filters:strip_icc()/pic143406.jpg",
+    "image": "https://cf.geekdo-images.com/ON3foDN0Rpnig6vmuP5Mhg__original/img/-H5CYqGG3uvtpfqomSgfMNRFP9E=/0x0/filters:format(jpeg)/pic143406.jpg",
+    "minplayers": 2,
+    "maxplayers": 4,
+    "playingtime": 0,
+    "rating": 5.8
+  },
+  {
+    "id": "1425",
+    "name": "Raid on St. Nazaire",
+    "year": 1987,
+    "thumbnail": "https://cf.geekdo-images.com/r0bKO80UNmZ2Tz2vScjPyw__small/img/0suiJlBEwVCV7TgAXVIIVs-EgLg=/fit-in/200x150/filters:strip_icc()/pic19850.jpg",
+    "image": "https://cf.geekdo-images.com/r0bKO80UNmZ2Tz2vScjPyw__original/img/LeW0WI3SjctP5MmrwZpjVLPJyuw=/0x0/filters:format(jpeg)/pic19850.jpg",
+    "minplayers": 1,
+    "maxplayers": 1,
+    "playingtime": 180,
+    "rating": 7.3
+  },
+  {
+    "id": "755",
+    "name": "Thunder at Cassino",
+    "year": 1987,
+    "thumbnail": "https://cf.geekdo-images.com/gqtXQBEtUCNPthS5kQPR-w__small/img/GSERjeV1DRSfAv_yOoha2eZbTwg=/fit-in/200x150/filters:strip_icc()/pic19520.jpg",
+    "image": "https://cf.geekdo-images.com/gqtXQBEtUCNPthS5kQPR-w__original/img/q3wQt0hWGCSG1GXn0yXo6H_cDrg=/0x0/filters:format(jpeg)/pic19520.jpg",
+    "minplayers": 1,
+    "maxplayers": 2,
+    "playingtime": 360,
+    "rating": 7.1
+  },
+  {
+    "id": "2288",
+    "name": "Blood Bowl (Second Edition)",
+    "year": 1988,
+    "thumbnail": "https://cf.geekdo-images.com/eewLXNdzKH1uhLUX1ztzfg__small/img/qeD8inr7DIX6hX-9q2n9LeDE8Y0=/fit-in/200x150/filters:strip_icc()/pic256111.jpg",
+    "image": "https://cf.geekdo-images.com/eewLXNdzKH1uhLUX1ztzfg__original/img/KSX-bmNsJyt0I-g7Y6wXugDDctk=/0x0/filters:format(jpeg)/pic256111.jpg",
+    "minplayers": 2,
+    "maxplayers": 2,
+    "playingtime": 180,
+    "rating": 6.9
+  },
+  {
+    "id": "1710",
+    "name": "The Siege of Jerusalem (Third Edition)",
+    "year": 1989,
+    "thumbnail": "https://cf.geekdo-images.com/Vg0pL7W_IapI3iiORVKkrg__small/img/Cgy8Ry38fwEAd26I6lB57yxdQTc=/fit-in/200x150/filters:strip_icc()/pic252228.jpg",
+    "image": "https://cf.geekdo-images.com/Vg0pL7W_IapI3iiORVKkrg__original/img/U3jhAJYOCGsbHrOw5ateFwcfZ7A=/0x0/filters:format(jpeg)/pic252228.jpg",
+    "minplayers": 2,
+    "maxplayers": 2,
+    "playingtime": 300,
+    "rating": 7.2
+  },
+  {
+    "id": "822",
+    "name": "Carcassonne",
+    "year": 2000,
+    "thumbnail": "https://cf.geekdo-images.com/peUgu3A20LRmAXAMyDQfpQ__small/img/oEEslN-EGqh82sNI6Aj4_MFXYg0=/fit-in/200x150/filters:strip_icc()/pic8621446.jpg",
+    "image": "https://cf.geekdo-images.com/peUgu3A20LRmAXAMyDQfpQ__original/img/bP18m_PYjyFOv1IBGgMOteQUneA=/0x0/filters:format(jpeg)/pic8621446.jpg",
+    "minplayers": 2,
+    "maxplayers": 5,
+    "playingtime": 45,
+    "rating": 7.4
+  },
+  {
+    "id": "15987",
+    "name": "Arkham Horror",
+    "year": 2005,
+    "thumbnail": "https://cf.geekdo-images.com/9cJf4kd_HZQo6NunfJlo9w__small/img/6VzhMMmGOxNTCHQ-8iFdn5vINis=/fit-in/200x150/filters:strip_icc()/pic175966.jpg",
+    "image": "https://cf.geekdo-images.com/9cJf4kd_HZQo6NunfJlo9w__original/img/YA5R2ZUV2Zwt_fgXIxu8bii3OJ0=/0x0/filters:format(jpeg)/pic175966.jpg",
+    "minplayers": 1,
+    "maxplayers": 8,
+    "playingtime": 240,
+    "rating": 7.2
+  },
+  {
+    "id": "35677",
+    "name": "Le Havre",
+    "year": 2008,
+    "thumbnail": "https://cf.geekdo-images.com/y7Rqd3S6J7vyVhicR1bqTQ__small/img/w1iHoYZCVTDZI6gsPuxOScA7FqU=/fit-in/200x150/filters:strip_icc()/pic6091101.jpg",
+    "image": "https://cf.geekdo-images.com/y7Rqd3S6J7vyVhicR1bqTQ__original/img/tQFXv1w2R-J-1cjyaKG9LAS2UOs=/0x0/filters:format(jpeg)/pic6091101.jpg",
+    "minplayers": 1,
+    "maxplayers": 5,
+    "playingtime": 150,
+    "rating": 7.8
+  },
+  {
+    "id": "30549",
+    "name": "Pandemic",
+    "year": 2008,
+    "thumbnail": "https://cf.geekdo-images.com/S3ybV1LAp-8SnHIXLLjVqA__small/img/oqViRj6nVxK3m36NluTxU1PZkrk=/fit-in/200x150/filters:strip_icc()/pic1534148.jpg",
+    "image": "https://cf.geekdo-images.com/S3ybV1LAp-8SnHIXLLjVqA__original/img/IsrvRLpUV1TEyZsO5rC-btXaPz0=/0x0/filters:format(jpeg)/pic1534148.jpg",
+    "minplayers": 2,
+    "maxplayers": 4,
+    "playingtime": 45,
+    "rating": 7.5
+  },
+  {
+    "id": "39683",
+    "name": "At the Gates of Loyang",
+    "year": 2009,
+    "thumbnail": "https://cf.geekdo-images.com/xnC5RT14H1CgAueR7VTPzw__small/img/xO8aUHS7cZPMJRg6gFXlP6LgZbw=/fit-in/200x150/filters:strip_icc()/pic3601060.jpg",
+    "image": "https://cf.geekdo-images.com/xnC5RT14H1CgAueR7VTPzw__original/img/oAJwaxaPahA0xfYEWqf3V2xc9x0=/0x0/filters:format(jpeg)/pic3601060.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 120,
+    "rating": 7.3
+  },
+  {
+    "id": "29603",
+    "name": "D-Day at Omaha Beach",
+    "year": 2009,
+    "thumbnail": "https://cf.geekdo-images.com/2vp4oeiBW3sjV-z3nSXyzg__small/img/utiWeznlJb3D2OfBpm-ceLsLr-c=/fit-in/200x150/filters:strip_icc()/pic6112285.jpg",
+    "image": "https://cf.geekdo-images.com/2vp4oeiBW3sjV-z3nSXyzg__original/img/9vmemmcBNBtBPYuVSRvz4Z2Vud0=/0x0/filters:format(jpeg)/pic6112285.jpg",
+    "minplayers": 1,
+    "maxplayers": 1,
+    "playingtime": 480,
+    "rating": 8.3
+  },
+  {
+    "id": "71721",
+    "name": "Space Hulk: Death Angel – The Card Game",
+    "year": 2010,
+    "thumbnail": "https://cf.geekdo-images.com/DZwne59lYWFyH3BuBsFsUg__small/img/bW65k-7xj15ziitctpA75PXNp6g=/fit-in/200x150/filters:strip_icc()/pic8215036.jpg",
+    "image": "https://cf.geekdo-images.com/DZwne59lYWFyH3BuBsFsUg__original/img/Vl_aag3nYP7nHeYx1xS-y3NFAC0=/0x0/filters:format(jpeg)/pic8215036.jpg",
+    "minplayers": 1,
+    "maxplayers": 6,
+    "playingtime": 60,
+    "rating": 7.0
+  },
+  {
+    "id": "43570",
+    "name": "Friday",
+    "year": 2011,
+    "thumbnail": "https://cf.geekdo-images.com/7bBUuYUIyKIBDh_UnNa_Fw__small/img/Bjg_3ovfjRqjGtYEaEj6107UGWY=/fit-in/200x150/filters:strip_icc()/pic1513328.jpg",
+    "image": "https://cf.geekdo-images.com/7bBUuYUIyKIBDh_UnNa_Fw__original/img/_tiZYJMEc26kgt7uNF6IM8A-8As=/0x0/filters:format(jpeg)/pic1513328.jpg",
+    "minplayers": 1,
+    "maxplayers": 1,
+    "playingtime": 25,
+    "rating": 7.1
+  },
+  {
+    "id": "124361",
+    "name": "Concordia",
+    "year": 2013,
+    "thumbnail": "https://cf.geekdo-images.com/CzwSm8i7tkLz6cBnrILZBg__small/img/ESPSltYYSFK-aJw6jOTdQrJGpOc=/fit-in/200x150/filters:strip_icc()/pic3453267.jpg",
+    "image": "https://cf.geekdo-images.com/CzwSm8i7tkLz6cBnrILZBg__original/img/BhJ3sB3uk-eSdR1iW4EP3cu0Wi0=/0x0/filters:format(jpeg)/pic3453267.jpg",
+    "minplayers": 2,
+    "maxplayers": 5,
+    "playingtime": 100,
+    "rating": 8.1
+  },
+  {
+    "id": "146021",
+    "name": "Eldritch Horror",
+    "year": 2013,
+    "thumbnail": "https://cf.geekdo-images.com/oxdsZKIX5_3ovDo38EIaeg__small/img/I1oCwOcGxAOVx2VE2LcXuKWoLvY=/fit-in/200x150/filters:strip_icc()/pic1872452.jpg",
+    "image": "https://cf.geekdo-images.com/oxdsZKIX5_3ovDo38EIaeg__original/img/vxK08kQAEn5qPbejK2CUTyWOsig=/0x0/filters:format(jpeg)/pic1872452.jpg",
+    "minplayers": 1,
+    "maxplayers": 8,
+    "playingtime": 240,
+    "rating": 7.7
+  },
+  {
+    "id": "140620",
+    "name": "Lewis & Clark: The Expedition",
+    "year": 2013,
+    "thumbnail": "https://cf.geekdo-images.com/IiJ1JK6AjlSCKsC8U_DqMw__small/img/sRsfWxhyB9hPjkFVSE1y_W_AiP8=/fit-in/200x150/filters:strip_icc()/pic5375937.jpg",
+    "image": "https://cf.geekdo-images.com/IiJ1JK6AjlSCKsC8U_DqMw__original/img/4W8ffc5xOvC6sl660XMGCBqkzJ8=/0x0/filters:format(jpeg)/pic5375937.jpg",
+    "minplayers": 1,
+    "maxplayers": 5,
+    "playingtime": 120,
+    "rating": 7.4
+  },
+  {
+    "id": "148729",
+    "name": "Maquis",
+    "year": 2013,
+    "thumbnail": "https://cf.geekdo-images.com/wgHvFfiPzMJUFrP4OLKtwQ__small/img/OAmwv-znUfaQFLPjiS1BpBjDUtM=/fit-in/200x150/filters:strip_icc()/pic5009864.jpg",
+    "image": "https://cf.geekdo-images.com/wgHvFfiPzMJUFrP4OLKtwQ__original/img/PP2_ccIAK3t_y1CU_6Wz4kCR_3c=/0x0/filters:format(jpeg)/pic5009864.jpg",
+    "minplayers": 1,
+    "maxplayers": 1,
+    "playingtime": 30,
+    "rating": 7.5
+  },
+  {
+    "id": "133473",
+    "name": "Sushi Go!",
+    "year": 2013,
+    "thumbnail": "https://cf.geekdo-images.com/Fn3PSPZVxa3YurlorITQ1Q__small/img/6XF493O0tSyLyZP5ArlcZrOTMXQ=/fit-in/200x150/filters:strip_icc()/pic1900075.jpg",
+    "image": "https://cf.geekdo-images.com/Fn3PSPZVxa3YurlorITQ1Q__original/img/5vRsn2TT9eJmq27i9HtLWKpB_xs=/0x0/filters:format(jpeg)/pic1900075.jpg",
+    "minplayers": 2,
+    "maxplayers": 5,
+    "playingtime": 15,
+    "rating": 7.0
+  },
+  {
+    "id": "196526",
+    "name": "Coffee Roaster",
+    "year": 2015,
+    "thumbnail": "https://cf.geekdo-images.com/XNphrzWB2Zc5e_NNBLLNxA__small/img/sfeP9moFqP7f7d537SHcWCu_hgk=/fit-in/200x150/filters:strip_icc()/pic4818329.jpg",
+    "image": "https://cf.geekdo-images.com/XNphrzWB2Zc5e_NNBLLNxA__original/img/yyu3dzc5pebqrdqe_o-umWqXZQw=/0x0/filters:format(jpeg)/pic4818329.jpg",
+    "minplayers": 1,
+    "maxplayers": 1,
+    "playingtime": 30,
+    "rating": 7.3
+  },
+  {
+    "id": "183315",
+    "name": "Tetrarchia",
+    "year": 2015,
+    "thumbnail": "https://cf.geekdo-images.com/g5u68wgO0jrMZU9B444oYg__small/img/zwIPLnQo9c_dHPUoN3xwVEoBylo=/fit-in/200x150/filters:strip_icc()/pic8590128.jpg",
+    "image": "https://cf.geekdo-images.com/g5u68wgO0jrMZU9B444oYg__original/img/Svn-zkaiCItdllagcNsicR2yHps=/0x0/filters:format(jpeg)/pic8590128.jpg",
+    "minplayers": 1,
+    "maxplayers": 5,
+    "playingtime": 40,
+    "rating": 7.5
+  },
+  {
+    "id": "180593",
+    "name": "The Bloody Inn",
+    "year": 2015,
+    "thumbnail": "https://cf.geekdo-images.com/GTUmt2ViVzJOT4ZKXbq2Zg__small/img/h-GMHsoeG4S6wRVjzlMGmP0UmQE=/fit-in/200x150/filters:strip_icc()/pic2618699.jpg",
+    "image": "https://cf.geekdo-images.com/GTUmt2ViVzJOT4ZKXbq2Zg__original/img/8dJoI4olAHxnPu7n4PiXTmyGJ20=/0x0/filters:format(jpeg)/pic2618699.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 60,
+    "rating": 7.1
+  },
+  {
+    "id": "163967",
+    "name": "Tiny Epic Galaxies",
+    "year": 2015,
+    "thumbnail": "https://cf.geekdo-images.com/c_87h8o0AOrfCO3hxMjjrA__small/img/OPNd-zRznLHOLfNDIN8rdhSMHPM=/fit-in/200x150/filters:strip_icc()/pic2349732.jpg",
+    "image": "https://cf.geekdo-images.com/c_87h8o0AOrfCO3hxMjjrA__original/img/a1VPd_zbaoq3vthJxghgsnt2AyM=/0x0/filters:format(jpeg)/pic2349732.jpg",
+    "minplayers": 1,
+    "maxplayers": 5,
+    "playingtime": 45,
+    "rating": 7.3
+  },
+  {
+    "id": "183394",
+    "name": "Viticulture Essential Edition",
+    "year": 2015,
+    "thumbnail": "https://cf.geekdo-images.com/l_PRU2lVlX9seScRFcvFlA__small/img/pULDtVd75QZgGfvSMhr6Rs07vK8=/fit-in/200x150/filters:strip_icc()/pic6500949.jpg",
+    "image": "https://cf.geekdo-images.com/l_PRU2lVlX9seScRFcvFlA__original/img/gDL7OZFlzoOFgU0VYlREs8P5hCQ=/0x0/filters:format(jpeg)/pic6500949.jpg",
+    "minplayers": 1,
+    "maxplayers": 6,
+    "playingtime": 90,
+    "rating": 8.0
+  },
+  {
+    "id": "177736",
+    "name": "A Feast for Odin",
+    "year": 2016,
+    "thumbnail": "https://cf.geekdo-images.com/s9oGMCo1fcfV4Dk3EnqLZw__small/img/AKxMMz2DTbBrEynhDROla8fdjJ4=/fit-in/200x150/filters:strip_icc()/pic3146943.png",
+    "image": "https://cf.geekdo-images.com/s9oGMCo1fcfV4Dk3EnqLZw__original/img/N1X-0JB1GapFVhl98nP4tNFXMcM=/0x0/filters:format(png)/pic3146943.png",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 120,
+    "rating": 8.2
+  },
+  {
+    "id": "191189",
+    "name": "Aeon's End",
+    "year": 2016,
+    "thumbnail": "https://cf.geekdo-images.com/d50LceHj6LIafa4S_qIsCg__small/img/KMFA-gXm_LbZpyXSAHbIZm-eAcQ=/fit-in/200x150/filters:strip_icc()/pic3189350.jpg",
+    "image": "https://cf.geekdo-images.com/d50LceHj6LIafa4S_qIsCg__original/img/4MsKNGm47PU9BGW4i2yamMlRSQ0=/0x0/filters:format(jpeg)/pic3189350.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 60,
+    "rating": 7.9
+  },
+  {
+    "id": "200680",
+    "name": "Agricola (Revised Edition)",
+    "year": 2016,
+    "thumbnail": "https://cf.geekdo-images.com/YCGWJMFwOI5efji2RJ2mSw__small/img/h_Rp2XYqaNElM2hrYxUSzMxRRgM=/fit-in/200x150/filters:strip_icc()/pic8093340.jpg",
+    "image": "https://cf.geekdo-images.com/YCGWJMFwOI5efji2RJ2mSw__original/img/jC_He46LcIcKWU-kSwkYdr9Z45E=/0x0/filters:format(jpeg)/pic8093340.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 120,
+    "rating": 8.0
+  },
+  {
+    "id": "205637",
+    "name": "Arkham Horror: The Card Game",
+    "year": 2016,
+    "thumbnail": "https://cf.geekdo-images.com/B5F5ulz0UivNgrI9Ky0euA__small/img/L8ouPl5jv2Ye9MC4R_Os2zSGigE=/fit-in/200x150/filters:strip_icc()/pic3122349.jpg",
+    "image": "https://cf.geekdo-images.com/B5F5ulz0UivNgrI9Ky0euA__original/img/guEKCewM_2e5ugltSN3dTSwdZJI=/0x0/filters:format(jpeg)/pic3122349.jpg",
+    "minplayers": 1,
+    "maxplayers": 2,
+    "playingtime": 120,
+    "rating": 8.1
+  },
+  {
+    "id": "175095",
+    "name": "Dawn of the Zeds (Third Edition)",
+    "year": 2016,
+    "thumbnail": "https://cf.geekdo-images.com/WnREnwi-pR72tqDa9-1zBQ__small/img/-bedWb_t582j4ghHjJpE7QCE0IU=/fit-in/200x150/filters:strip_icc()/pic4929411.jpg",
+    "image": "https://cf.geekdo-images.com/WnREnwi-pR72tqDa9-1zBQ__original/img/o31sWdbMtQFA0cZQtpx1pB7if-E=/0x0/filters:format(jpeg)/pic4929411.jpg",
+    "minplayers": 1,
+    "maxplayers": 5,
+    "playingtime": 120,
+    "rating": 8.1
+  },
+  {
+    "id": "176083",
+    "name": "Hit Z Road",
+    "year": 2016,
+    "thumbnail": "https://cf.geekdo-images.com/dPuhviFAHX6m9eCTw0OTsA__small/img/f1IExq8l4arckhYR0dacQIsUW6w=/fit-in/200x150/filters:strip_icc()/pic3539855.jpg",
+    "image": "https://cf.geekdo-images.com/dPuhviFAHX6m9eCTw0OTsA__original/img/mfDXkmkMunWR6ar33FM26H2Wf6g=/0x0/filters:format(jpeg)/pic3539855.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 60,
+    "rating": 6.8
+  },
+  {
+    "id": "179275",
+    "name": "One Deck Dungeon",
+    "year": 2016,
+    "thumbnail": "https://cf.geekdo-images.com/quvyGpE7kwbd2Mt1H5iLwQ__small/img/Vf5PvYElsfOG28LqJimwPC6rqw4=/fit-in/200x150/filters:strip_icc()/pic3019101.jpg",
+    "image": "https://cf.geekdo-images.com/quvyGpE7kwbd2Mt1H5iLwQ__original/img/pjwQVzsCHiXg8qFTZpVoJYx6SOE=/0x0/filters:format(jpeg)/pic3019101.jpg",
+    "minplayers": 1,
+    "maxplayers": 2,
+    "playingtime": 45,
+    "rating": 6.9
+  },
+  {
+    "id": "192153",
+    "name": "Reign of Cthulhu",
+    "year": 2016,
+    "thumbnail": "https://cf.geekdo-images.com/rwNaEQfzABp7dkpnwn1Ksw__small/img/A77zWf8GZ3rPK5FPTitlJuTAoNM=/fit-in/200x150/filters:strip_icc()/pic2866737.png",
+    "image": "https://cf.geekdo-images.com/rwNaEQfzABp7dkpnwn1Ksw__original/img/NCSz1g5A1Dydfqlv68rbPEoRTes=/0x0/filters:format(png)/pic2866737.png",
+    "minplayers": 2,
+    "maxplayers": 4,
+    "playingtime": 40,
+    "rating": 7.4
+  },
+  {
+    "id": "169426",
+    "name": "Roll Player",
+    "year": 2016,
+    "thumbnail": "https://cf.geekdo-images.com/enmQAOQl99U6wiQvZoL5GQ__small/img/zdtrILXRjphkt5HYP0tuxzlenG4=/fit-in/200x150/filters:strip_icc()/pic2556921.jpg",
+    "image": "https://cf.geekdo-images.com/enmQAOQl99U6wiQvZoL5GQ__original/img/iiKhufERu8v8JpErc5kUoO8WiNw=/0x0/filters:format(jpeg)/pic2556921.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 90,
+    "rating": 7.4
+  },
+  {
+    "id": "169786",
+    "name": "Scythe",
+    "year": 2016,
+    "thumbnail": "https://cf.geekdo-images.com/7k_nOxpO9OGIjhLq2BUZdA__small/img/eQ69OEDdjYjfKg6q5Navee87skU=/fit-in/200x150/filters:strip_icc()/pic3163924.jpg",
+    "image": "https://cf.geekdo-images.com/7k_nOxpO9OGIjhLq2BUZdA__original/img/HlDb9F365w0tSP8uD1vf1pfniQE=/0x0/filters:format(jpeg)/pic3163924.jpg",
+    "minplayers": 1,
+    "maxplayers": 5,
+    "playingtime": 115,
+    "rating": 8.1
+  },
+  {
+    "id": "167791",
+    "name": "Terraforming Mars",
+    "year": 2016,
+    "thumbnail": "https://cf.geekdo-images.com/wg9oOLcsKvDesSUdZQ4rxw__small/img/BTxqxgYay5tHJfVoJ2NF5g43_gA=/fit-in/200x150/filters:strip_icc()/pic3536616.jpg",
+    "image": "https://cf.geekdo-images.com/wg9oOLcsKvDesSUdZQ4rxw__original/img/thIqWDnH9utKuoKVEUqveDixprI=/0x0/filters:format(jpeg)/pic3536616.jpg",
+    "minplayers": 1,
+    "maxplayers": 5,
+    "playingtime": 120,
+    "rating": 8.3
+  },
+  {
+    "id": "196496",
+    "name": "Warfighter: The WWII Tactical Combat Card Game",
+    "year": 2016,
+    "thumbnail": "https://cf.geekdo-images.com/6BotxMhjoONF6YXGvqkPyw__small/img/iLTFIc4-vXyDxy_Cz64R3gsj2cY=/fit-in/200x150/filters:strip_icc()/pic4683556.png",
+    "image": "https://cf.geekdo-images.com/6BotxMhjoONF6YXGvqkPyw__original/img/_bcIjXB9_G770cXgS-DC1Kwfbp0=/0x0/filters:format(png)/pic4683556.png",
+    "minplayers": 1,
+    "maxplayers": 6,
+    "playingtime": 90,
+    "rating": 7.9
+  },
+  {
+    "id": "232361",
+    "name": "After the Virus",
+    "year": 2017,
+    "thumbnail": "https://cf.geekdo-images.com/JR8JhaIHviqfu4A6P54b4w__small/img/uTVGYbxpf4sYOCXhPxdbdKSCug4=/fit-in/200x150/filters:strip_icc()/pic3738954.jpg",
+    "image": "https://cf.geekdo-images.com/JR8JhaIHviqfu4A6P54b4w__original/img/Kis7_kVGjCClrxws_RL0JmSGp8o=/0x0/filters:format(jpeg)/pic3738954.jpg",
+    "minplayers": 1,
+    "maxplayers": 3,
+    "playingtime": 90,
+    "rating": 7.3
+  },
+  {
+    "id": "185343",
+    "name": "Anachrony",
+    "year": 2017,
+    "thumbnail": "https://cf.geekdo-images.com/31quLNzteInnevVRAABoow__small/img/a0G93aMOKp3_mmnCURYWuZd210U=/fit-in/200x150/filters:strip_icc()/pic3499707.jpg",
+    "image": "https://cf.geekdo-images.com/31quLNzteInnevVRAABoow__original/img/3KfMPSj7jjhG0g5lQBsO-bn67D0=/0x0/filters:format(jpeg)/pic3499707.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 120,
+    "rating": 8.0
+  },
+  {
+    "id": "230914",
+    "name": "Carcassonne Big Box 6",
+    "year": 2017,
+    "thumbnail": "https://cf.geekdo-images.com/RuVaR99haabPBv8xQP-K7g__small/img/nGTNaDvoURPZrg7Jv6ZPL3cXswE=/fit-in/200x150/filters:strip_icc()/pic6882456.png",
+    "image": "https://cf.geekdo-images.com/RuVaR99haabPBv8xQP-K7g__original/img/EJcx2LOvZUbYiBULcC0vK6iqS6A=/0x0/filters:format(png)/pic6882456.png",
+    "minplayers": 2,
+    "maxplayers": 6,
+    "playingtime": 35,
+    "rating": 8.1
+  },
+  {
+    "id": "220308",
+    "name": "Gaia Project",
+    "year": 2017,
+    "thumbnail": "https://cf.geekdo-images.com/hGWFm3hbMlCDsfCsauOQ4g__small/img/NNG7Ijyx4evp5gcVReis9i0koas=/fit-in/200x150/filters:strip_icc()/pic5375625.png",
+    "image": "https://cf.geekdo-images.com/hGWFm3hbMlCDsfCsauOQ4g__original/img/tjlflQtUPFiTpLpwk1NCVCS29Ic=/0x0/filters:format(png)/pic5375625.png",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 150,
+    "rating": 8.4
+  },
+  {
+    "id": "200077",
+    "name": "Mint Works",
+    "year": 2017,
+    "thumbnail": "https://cf.geekdo-images.com/v05V4Po1FdP2tbIvWOGp-g__small/img/wBNdIabdazh-D5_f5ZjpxMGPvU8=/fit-in/200x150/filters:strip_icc()/pic3418969.png",
+    "image": "https://cf.geekdo-images.com/v05V4Po1FdP2tbIvWOGp-g__original/img/D2VhcbE2XniRmCx8pFd-r4qajno=/0x0/filters:format(png)/pic3418969.png",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 20,
+    "rating": 6.9
+  },
+  {
+    "id": "187617",
+    "name": "Nemo's War (Second Edition)",
+    "year": 2017,
+    "thumbnail": "https://cf.geekdo-images.com/E5DrIRQo7MJS3ww70esx5Q__small/img/yHWA5FaijY02vokhP6ZubmDS8SY=/fit-in/200x150/filters:strip_icc()/pic4892981.jpg",
+    "image": "https://cf.geekdo-images.com/E5DrIRQo7MJS3ww70esx5Q__original/img/XGQVNSRgWk94eCVNd14R1zZq62M=/0x0/filters:format(jpeg)/pic4892981.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 120,
+    "rating": 7.8
+  },
+  {
+    "id": "234277",
+    "name": "Nusfjord",
+    "year": 2017,
+    "thumbnail": "https://cf.geekdo-images.com/nKYqNPEE94Zk_q5Vtk527w__small/img/b380XF_C0n--whN9elUn8jI__Yg=/fit-in/200x150/filters:strip_icc()/pic3729070.jpg",
+    "image": "https://cf.geekdo-images.com/nKYqNPEE94Zk_q5Vtk527w__original/img/Bf35-bzWhSF8jMq8pfzubBxuNlU=/0x0/filters:format(jpeg)/pic3729070.jpg",
+    "minplayers": 1,
+    "maxplayers": 5,
+    "playingtime": 100,
+    "rating": 7.6
+  },
+  {
+    "id": "224821",
+    "name": "One Deck Dungeon: Forest of Shadows",
+    "year": 2017,
+    "thumbnail": "https://cf.geekdo-images.com/rfkpP2id0JwDWw5694PRQQ__small/img/5A9VoUaZ1B5Wx1t0n74mfLBHW2o=/fit-in/200x150/filters:strip_icc()/pic3496794.jpg",
+    "image": "https://cf.geekdo-images.com/rfkpP2id0JwDWw5694PRQQ__original/img/Od_smbHwsk-3Qw2HntZbU-oUg4I=/0x0/filters:format(jpeg)/pic3496794.jpg",
+    "minplayers": 1,
+    "maxplayers": 2,
+    "playingtime": 45,
+    "rating": 7.1
+  },
+  {
+    "id": "223779",
+    "name": "Pocket Mars",
+    "year": 2017,
+    "thumbnail": "https://cf.geekdo-images.com/3lvu7MsJsj_9dZ4AKQZemg__small/img/i4bWn3QQP-K3zpvuYwfg1X5AaO0=/fit-in/200x150/filters:strip_icc()/pic3882123.png",
+    "image": "https://cf.geekdo-images.com/3lvu7MsJsj_9dZ4AKQZemg__original/img/ADNyCztiyEEX0Kc2O_LnkEW5yb4=/0x0/filters:format(png)/pic3882123.png",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 30,
+    "rating": 6.4
+  },
+  {
+    "id": "162886",
+    "name": "Spirit Island",
+    "year": 2017,
+    "thumbnail": "https://cf.geekdo-images.com/kjCm4ZvPjIZxS-mYgSPy1g__small/img/aUlIih2_R7P8IYKeyNl2heLQbu8=/fit-in/200x150/filters:strip_icc()/pic7013651.jpg",
+    "image": "https://cf.geekdo-images.com/kjCm4ZvPjIZxS-mYgSPy1g__original/img/9uLd9C3XAvInLCLhAoXqKVk56zs=/0x0/filters:format(jpeg)/pic7013651.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 120,
+    "rating": 8.3
+  },
+  {
+    "id": "216459",
+    "name": "The Lost Expedition",
+    "year": 2017,
+    "thumbnail": "https://cf.geekdo-images.com/W8yjFs_0LaFL7TMg-nxi_g__small/img/cKmWHBSmqx0MFFyO_6dZmedX0U4=/fit-in/200x150/filters:strip_icc()/pic3339655.jpg",
+    "image": "https://cf.geekdo-images.com/W8yjFs_0LaFL7TMg-nxi_g__original/img/KUZ244YDkZpaXtrRdVRcB1TnV2Y=/0x0/filters:format(jpeg)/pic3339655.jpg",
+    "minplayers": 1,
+    "maxplayers": 5,
+    "playingtime": 50,
+    "rating": 7.0
+  },
+  {
+    "id": "188920",
+    "name": "This War of Mine: The Board Game",
+    "year": 2017,
+    "thumbnail": "https://cf.geekdo-images.com/gQOQW7p1RWHzY54Lrs-_pA__small/img/qmypl6agXd78n1_vAiO5LZcCXHc=/fit-in/200x150/filters:strip_icc()/pic3315915.jpg",
+    "image": "https://cf.geekdo-images.com/gQOQW7p1RWHzY54Lrs-_pA__original/img/PSC8BO2njNcBJhxvi0IV5Jb5hgo=/0x0/filters:format(jpeg)/pic3315915.jpg",
+    "minplayers": 1,
+    "maxplayers": 6,
+    "playingtime": 120,
+    "rating": 7.8
+  },
+  {
+    "id": "236457",
+    "name": "Architects of the West Kingdom",
+    "year": 2018,
+    "thumbnail": "https://cf.geekdo-images.com/OAX7HfOz-9N60StgADzd0g__small/img/sBMaoJ-Kz74lJ6djcl-NNMTr0Wo=/fit-in/200x150/filters:strip_icc()/pic3781944.png",
+    "image": "https://cf.geekdo-images.com/OAX7HfOz-9N60StgADzd0g__original/img/x2Y_DYWrzzleMETfnu7Jm3R8jPo=/0x0/filters:format(png)/pic3781944.png",
+    "minplayers": 1,
+    "maxplayers": 5,
+    "playingtime": 80,
+    "rating": 7.7
+  },
+  {
+    "id": "257499",
+    "name": "Arkham Horror (Third Edition)",
+    "year": 2018,
+    "thumbnail": "https://cf.geekdo-images.com/09KeqyJEtu2qcskbtlOhqw__small/img/-xrcoiHjk6uaMY3dtwS_uYIrMog=/fit-in/200x150/filters:strip_icc()/pic5726297.jpg",
+    "image": "https://cf.geekdo-images.com/09KeqyJEtu2qcskbtlOhqw__original/img/H6qePV4xg2vrwXoWcOhAhIZUtSo=/0x0/filters:format(jpeg)/pic5726297.jpg",
+    "minplayers": 1,
+    "maxplayers": 6,
+    "playingtime": 180,
+    "rating": 7.7
+  },
+  {
+    "id": "231581",
+    "name": "AuZtralia",
+    "year": 2018,
+    "thumbnail": "https://cf.geekdo-images.com/ejsIlS4INZ23Zyd1oQd5GA__small/img/LhEU5iotxrQHpdt0hBAeQ3X5Al4=/fit-in/200x150/filters:strip_icc()/pic4144485.jpg",
+    "image": "https://cf.geekdo-images.com/ejsIlS4INZ23Zyd1oQd5GA__original/img/j6q9x1oUF7jI6Pl_7RwWcWJGpCE=/0x0/filters:format(jpeg)/pic4144485.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 120,
+    "rating": 7.3
+  },
+  {
+    "id": "246761",
+    "name": "Cahoots",
+    "year": 2018,
+    "thumbnail": "https://cf.geekdo-images.com/HbDx3mCSSnO6XIRhwV3uLg__small/img/ychKq_7420t0peZAtT5JggPHyuk=/fit-in/200x150/filters:strip_icc()/pic3989425.jpg",
+    "image": "https://cf.geekdo-images.com/HbDx3mCSSnO6XIRhwV3uLg__original/img/2R-FEy1aoczi1skm6wVWc0YFyD0=/0x0/filters:format(jpeg)/pic3989425.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 20,
+    "rating": 7.1
+  },
+  {
+    "id": "256570",
+    "name": "Crown of Emara",
+    "year": 2018,
+    "thumbnail": "https://cf.geekdo-images.com/fbpFsvwOHlm35p215DXMMg__small/img/Uv71KmElItbtpXW0Pw4VKwYwtDY=/fit-in/200x150/filters:strip_icc()/pic7415514.jpg",
+    "image": "https://cf.geekdo-images.com/fbpFsvwOHlm35p215DXMMg__original/img/vssfilc2Za5P83J9xulHw6I53rU=/0x0/filters:format(jpeg)/pic7415514.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 75,
+    "rating": 7.3
+  },
+  {
+    "id": "245476",
+    "name": "CuBirds",
+    "year": 2018,
+    "thumbnail": "https://cf.geekdo-images.com/FDBUwGFBkniyl8q4Alvq8A__small/img/EiGltQvI5VsmCSYYxjgD7kXY2eg=/fit-in/200x150/filters:strip_icc()/pic7491534.jpg",
+    "image": "https://cf.geekdo-images.com/FDBUwGFBkniyl8q4Alvq8A__original/img/PQee1I5tS1r2TjNXMj7XR6uCsxE=/0x0/filters:format(jpeg)/pic7491534.jpg",
+    "minplayers": 2,
+    "maxplayers": 5,
+    "playingtime": 20,
+    "rating": 6.9
+  },
+  {
+    "id": "230267",
+    "name": "Dice Settlers",
+    "year": 2018,
+    "thumbnail": "https://cf.geekdo-images.com/Rq78Zg67kx0Ay24kgNnx0Q__small/img/weF3RZ3u_waKER89aCEKW-ciQPc=/fit-in/200x150/filters:strip_icc()/pic4145901.jpg",
+    "image": "https://cf.geekdo-images.com/Rq78Zg67kx0Ay24kgNnx0Q__original/img/Bsg0JxFtvDlhn6zbuX0bpSbwV6k=/0x0/filters:format(jpeg)/pic4145901.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 60,
+    "rating": 6.9
+  },
+  {
+    "id": "199792",
+    "name": "Everdell",
+    "year": 2018,
+    "thumbnail": "https://cf.geekdo-images.com/fjE7V5LNq31yVEW_yuqI-Q__small/img/Cf_mYxR_VvdjTEPXseSurni2JNI=/fit-in/200x150/filters:strip_icc()/pic3918905.png",
+    "image": "https://cf.geekdo-images.com/fjE7V5LNq31yVEW_yuqI-Q__original/img/HQ1ti16wT9lqja5_h3gUfHUIcVI=/0x0/filters:format(png)/pic3918905.png",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 80,
+    "rating": 8.0
+  },
+  {
+    "id": "231733",
+    "name": "Obsession",
+    "year": 2018,
+    "thumbnail": "https://cf.geekdo-images.com/sy89BiuZXfbSnG7Cag9tBQ__small/img/eTnMwfCC2jCGDPXC08SIaMXNOTM=/fit-in/200x150/filters:strip_icc()/pic5902073.png",
+    "image": "https://cf.geekdo-images.com/sy89BiuZXfbSnG7Cag9tBQ__original/img/uArsqbWyUALa982zGWsy8QQWnjE=/0x0/filters:format(png)/pic5902073.png",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 90,
+    "rating": 8.1
+  },
+  {
+    "id": "245487",
+    "name": "Orchard: 9 card solitaire game",
+    "year": 2018,
+    "thumbnail": "https://cf.geekdo-images.com/tAlkLzFCj-OusgaxQo7SxQ__small/img/ePGNy1jSXaVuTx05OYcsOTubEjA=/fit-in/200x150/filters:strip_icc()/pic5159434.png",
+    "image": "https://cf.geekdo-images.com/tAlkLzFCj-OusgaxQo7SxQ__original/img/QEz5rtHvpnZ_uGaBipjknwQ3gKI=/0x0/filters:format(png)/pic5159434.png",
+    "minplayers": 1,
+    "maxplayers": 1,
+    "playingtime": 10,
+    "rating": 7.2
+  },
+  {
+    "id": "219101",
+    "name": "Pavlov's House",
+    "year": 2018,
+    "thumbnail": "https://cf.geekdo-images.com/eJcLk3a1En2ENBtQFIddiQ__small/img/h1oifI8L1BsmGNViXlSlD1ByN2Q=/fit-in/200x150/filters:strip_icc()/pic7013391.jpg",
+    "image": "https://cf.geekdo-images.com/eJcLk3a1En2ENBtQFIddiQ__original/img/sFy_vp1VcP79fkVKwxqT5yPCXec=/0x0/filters:format(jpeg)/pic7013391.jpg",
+    "minplayers": 1,
+    "maxplayers": 3,
+    "playingtime": 75,
+    "rating": 7.9
+  },
+  {
+    "id": "260407",
+    "name": "Soviet Kitchen Unleashed",
+    "year": 2018,
+    "thumbnail": "https://cf.geekdo-images.com/PZt1wHdi7SE7izj9pNPErg__small/img/gm3uGH7Y-C6TySAvIV8yxKTapRU=/fit-in/200x150/filters:strip_icc()/pic4790735.png",
+    "image": "https://cf.geekdo-images.com/PZt1wHdi7SE7izj9pNPErg__original/img/Xk46APUX430o1GR488qvyCG1l3E=/0x0/filters:format(png)/pic4790735.png",
+    "minplayers": 1,
+    "maxplayers": 6,
+    "playingtime": 25,
+    "rating": 6.7
+  },
+  {
+    "id": "251658",
+    "name": "Sprawlopolis",
+    "year": 2018,
+    "thumbnail": "https://cf.geekdo-images.com/aZ3I9B_aEywK4O_qP_Hz9w__small/img/8IMkDRysr2XJafkJGGWoWRcj3e0=/fit-in/200x150/filters:strip_icc()/pic4654146.png",
+    "image": "https://cf.geekdo-images.com/aZ3I9B_aEywK4O_qP_Hz9w__original/img/70LwdlP8ezNxe00B48mSmzFfStU=/0x0/filters:format(png)/pic4654146.png",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 20,
+    "rating": 7.3
+  },
+  {
+    "id": "229853",
+    "name": "Teotihuacan: City of Gods",
+    "year": 2018,
+    "thumbnail": "https://cf.geekdo-images.com/wW5xjgBJcFyLaEWZwrYuKA__small/img/MppmP7GtDAfKiB5LiAl-ZtPxOPE=/fit-in/200x150/filters:strip_icc()/pic4583626.jpg",
+    "image": "https://cf.geekdo-images.com/wW5xjgBJcFyLaEWZwrYuKA__original/img/72kzn6t41ZxLEr3GFd8ir6hDdH4=/0x0/filters:format(jpeg)/pic4583626.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 120,
+    "rating": 7.8
+  },
+  {
+    "id": "281946",
+    "name": "Aftermath",
+    "year": 2019,
+    "thumbnail": "https://cf.geekdo-images.com/v5FE5VZ6CV7N5zUk1IRXQg__small/img/r3wI53cGFf_oukNdARc88Z_sIl0=/fit-in/200x150/filters:strip_icc()/pic4781087.jpg",
+    "image": "https://cf.geekdo-images.com/v5FE5VZ6CV7N5zUk1IRXQg__original/img/BJShPvT6lQsbP23jYDEuYFQehzw=/0x0/filters:format(jpeg)/pic4781087.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 120,
+    "rating": 7.4
+  },
+  {
+    "id": "269511",
+    "name": "Cooper Island",
+    "year": 2019,
+    "thumbnail": "https://cf.geekdo-images.com/YDY6ZHqdRyDMvpfQO_jV7A__small/img/AJf9NTVOgyXyntg2jjZW1FuR9aM=/fit-in/200x150/filters:strip_icc()/pic4853982.jpg",
+    "image": "https://cf.geekdo-images.com/YDY6ZHqdRyDMvpfQO_jV7A__original/img/A11s0hdDTIG32lwT3d_7NLMHmM0=/0x0/filters:format(jpeg)/pic4853982.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 120,
+    "rating": 7.5
+  },
+  {
+    "id": "253344",
+    "name": "Cthulhu: Death May Die",
+    "year": 2019,
+    "thumbnail": "https://cf.geekdo-images.com/e8D09pfFsUsoX1D81EeoZg__small/img/j03wBmZg1Kp5QaaIu9p-O8XRqeU=/fit-in/200x150/filters:strip_icc()/pic4705171.jpg",
+    "image": "https://cf.geekdo-images.com/e8D09pfFsUsoX1D81EeoZg__original/img/8_FKwPd8bBL3PFjef8Yjz_sFWSk=/0x0/filters:format(jpeg)/pic4705171.jpg",
+    "minplayers": 1,
+    "maxplayers": 5,
+    "playingtime": 120,
+    "rating": 8.2
+  },
+  {
+    "id": "233208",
+    "name": "D-Day Dice (Second Edition)",
+    "year": 2019,
+    "thumbnail": "https://cf.geekdo-images.com/-jKARpcHmBCJ14JE0zDQ8Q__small/img/VDmMDtRe-DJIAoniIMXdPC1cUig=/fit-in/200x150/filters:strip_icc()/pic5266901.jpg",
+    "image": "https://cf.geekdo-images.com/-jKARpcHmBCJ14JE0zDQ8Q__original/img/O8jP72X3JaJuv-86E1kogtBYZnI=/0x0/filters:format(jpeg)/pic5266901.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 45,
+    "rating": 7.4
+  },
+  {
+    "id": "231038",
+    "name": "Dreamscape",
+    "year": 2019,
+    "thumbnail": "https://cf.geekdo-images.com/3EdeIbt587pyekLIYZlp_A__small/img/ebgQpWwhCfvnFJ0lcEYT7Sr6ueY=/fit-in/200x150/filters:strip_icc()/pic5027884.jpg",
+    "image": "https://cf.geekdo-images.com/3EdeIbt587pyekLIYZlp_A__original/img/4NJrFZttBEVH7zFKXPxf1JKsRUk=/0x0/filters:format(jpeg)/pic5027884.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 90,
+    "rating": 7.3
+  },
+  {
+    "id": "216600",
+    "name": "Fantastic Factories",
+    "year": 2019,
+    "thumbnail": "https://cf.geekdo-images.com/AzNYQ2o-SXBAHFpPPtRBIw__small/img/CkfTNq419k6DTJthFwPA5oKYoHE=/fit-in/200x150/filters:strip_icc()/pic4095959.png",
+    "image": "https://cf.geekdo-images.com/AzNYQ2o-SXBAHFpPPtRBIw__original/img/QSapQT41vJZkBMzXx5ZkTbuTVf8=/0x0/filters:format(png)/pic4095959.png",
+    "minplayers": 1,
+    "maxplayers": 5,
+    "playingtime": 60,
+    "rating": 7.4
+  },
+  {
+    "id": "254588",
+    "name": "Hearts and Minds: Vietnam 1965-1975 (Third Edition)",
+    "year": 2019,
+    "thumbnail": "https://cf.geekdo-images.com/v5naYmTPssWD_JGoGRfIiA__small/img/aTbBbWu41wmiwu25sHRABF78xDk=/fit-in/200x150/filters:strip_icc()/pic4222624.jpg",
+    "image": "https://cf.geekdo-images.com/v5naYmTPssWD_JGoGRfIiA__original/img/glwmDC8Gz3uJSQBe9UdYbBaRd28=/0x0/filters:format(jpeg)/pic4222624.jpg",
+    "minplayers": 1,
+    "maxplayers": 2,
+    "playingtime": 360,
+    "rating": 8.0
+  },
+  {
+    "id": "282524",
+    "name": "Horrified",
+    "year": 2019,
+    "thumbnail": "https://cf.geekdo-images.com/SoClIcwjDo_iZs0idVikDw__small/img/YSf5Z99aBqAlNKaGBj_oGb1oKH4=/fit-in/200x150/filters:strip_icc()/pic4848330.jpg",
+    "image": "https://cf.geekdo-images.com/SoClIcwjDo_iZs0idVikDw__original/img/TEprFkOM3G_u2HnUvh05WITeXbg=/0x0/filters:format(jpeg)/pic4848330.jpg",
+    "minplayers": 1,
+    "maxplayers": 5,
+    "playingtime": 60,
+    "rating": 7.6
+  },
+  {
+    "id": "271324",
+    "name": "It's a Wonderful World",
+    "year": 2019,
+    "thumbnail": "https://cf.geekdo-images.com/od4vDTdXGPSVc-kjLqM11w__small/img/T2ukKoCUNv2LMxg5GOlOb8WTzNI=/fit-in/200x150/filters:strip_icc()/pic4651175.jpg",
+    "image": "https://cf.geekdo-images.com/od4vDTdXGPSVc-kjLqM11w__original/img/sN8TnSkFGCzNM01b_drFxwYnqlM=/0x0/filters:format(jpeg)/pic4651175.jpg",
+    "minplayers": 1,
+    "maxplayers": 5,
+    "playingtime": 45,
+    "rating": 7.6
+  },
+  {
+    "id": "276025",
+    "name": "Maracaibo",
+    "year": 2019,
+    "thumbnail": "https://cf.geekdo-images.com/rMNa0k05zMdKgSEp26Q3Tw__small/img/lVlnhYyxlZb3WuKZJHLoJcFHEjs=/fit-in/200x150/filters:strip_icc()/pic4917407.jpg",
+    "image": "https://cf.geekdo-images.com/rMNa0k05zMdKgSEp26Q3Tw__original/img/yhnCcq9UplffqjSCe08mjTFvgOM=/0x0/filters:format(jpeg)/pic4917407.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 120,
+    "rating": 7.9
+  },
+  {
+    "id": "276161",
+    "name": "MOON",
+    "year": 2019,
+    "thumbnail": "https://cf.geekdo-images.com/2-b3wfWOxRS5eB5ApTKtxw__small/img/z0KG2tf_zHhi5P7Q1YWJZ6UEdTQ=/fit-in/200x150/filters:strip_icc()/pic6813595.jpg",
+    "image": "https://cf.geekdo-images.com/2-b3wfWOxRS5eB5ApTKtxw__original/img/YEbayBmysQ1Uq7g_QzHg1WAmMXE=/0x0/filters:format(jpeg)/pic6813595.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 30,
+    "rating": 6.8
+  },
+  {
+    "id": "266524",
+    "name": "PARKS",
+    "year": 2019,
+    "thumbnail": "https://cf.geekdo-images.com/mF2cSNRk2O6HtE45Sl9TcA__small/img/K2AgL-KE_CTcvwahWd7zlt9YR0U=/fit-in/200x150/filters:strip_icc()/pic4852372.jpg",
+    "image": "https://cf.geekdo-images.com/mF2cSNRk2O6HtE45Sl9TcA__original/img/_KNgPoC_4l7iN0ntbFILexOJpfc=/0x0/filters:format(jpeg)/pic4852372.jpg",
+    "minplayers": 1,
+    "maxplayers": 5,
+    "playingtime": 60,
+    "rating": 7.6
+  },
+  {
+    "id": "271896",
+    "name": "Star Wars: Outer Rim",
+    "year": 2019,
+    "thumbnail": "https://cf.geekdo-images.com/RjwAj6hw5aEMGvosEA12gw__small/img/Ri6aOjHVFhgu_xK_xuBoCOCck-A=/fit-in/200x150/filters:strip_icc()/pic5879810.jpg",
+    "image": "https://cf.geekdo-images.com/RjwAj6hw5aEMGvosEA12gw__original/img/jQUkqrDd0lOX6IRGq5Cbj1junL4=/0x0/filters:format(jpeg)/pic5879810.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 180,
+    "rating": 7.7
+  },
+  {
+    "id": "283317",
+    "name": "The 7th Continent: Classic Edition",
+    "year": 2019,
+    "thumbnail": "https://cf.geekdo-images.com/8qaG9E7-WqvUhxFqh3GVow__small/img/6B_DFyF2QD46_DtBvFa5SN5fp8I=/fit-in/200x150/filters:strip_icc()/pic4834258.jpg",
+    "image": "https://cf.geekdo-images.com/8qaG9E7-WqvUhxFqh3GVow__original/img/WaLsLrkeDTSiN_FKnJ1aZQQv6WE=/0x0/filters:format(jpeg)/pic4834258.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 1000,
+    "rating": 7.4
+  },
+  {
+    "id": "271320",
+    "name": "The Castles of Burgundy",
+    "year": 2019,
+    "thumbnail": "https://cf.geekdo-images.com/VrNrk7XVU1hN0j1ZFhjcjw__small/img/6XPO0XNGGw3V77NjWR0K7Y33fqc=/fit-in/200x150/filters:strip_icc()/pic4934938.jpg",
+    "image": "https://cf.geekdo-images.com/VrNrk7XVU1hN0j1ZFhjcjw__original/img/IYxnn0KV56lDy18_0e23DSLcMso=/0x0/filters:format(jpeg)/pic4934938.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 120,
+    "rating": 8.5
+  },
+  {
+    "id": "281259",
+    "name": "The Isle of Cats",
+    "year": 2019,
+    "thumbnail": "https://cf.geekdo-images.com/AuAheDzhkLufiZFE9JaRNA__small/img/gENtMHYJDff6XaGGOYw9oSZShCs=/fit-in/200x150/filters:strip_icc()/pic4781085.jpg",
+    "image": "https://cf.geekdo-images.com/AuAheDzhkLufiZFE9JaRNA__original/img/pKq-l1Ms78olHwMbZYMa_x6m-fM=/0x0/filters:format(jpeg)/pic4781085.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 90,
+    "rating": 7.6
+  },
+  {
+    "id": "255668",
+    "name": "Trickerion: Collector's Edition",
+    "year": 2019,
+    "thumbnail": "https://cf.geekdo-images.com/hWxrNSHxNtf-ynX13FyN4w__small/img/y0iFR77cs6d2v-2l2k9bzEh6oBs=/fit-in/200x150/filters:strip_icc()/pic5301842.png",
+    "image": "https://cf.geekdo-images.com/hWxrNSHxNtf-ynX13FyN4w__original/img/uIskCBDhLMpEjXrMgj-Unoj1qZc=/0x0/filters:format(png)/pic5301842.png",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 180,
+    "rating": 8.7
+  },
+  {
+    "id": "268864",
+    "name": "Undaunted: Normandy",
+    "year": 2019,
+    "thumbnail": "https://cf.geekdo-images.com/iCd6hMGDzsQ_UXh00iKsJA__small/img/QbOlBm7DZGP2ZBnGZ-YaD-py-UQ=/fit-in/200x150/filters:strip_icc()/pic4602347.jpg",
+    "image": "https://cf.geekdo-images.com/iCd6hMGDzsQ_UXh00iKsJA__original/img/QhbQ2AMud-_H0fliiSIvc0dowOU=/0x0/filters:format(jpeg)/pic4602347.jpg",
+    "minplayers": 2,
+    "maxplayers": 2,
+    "playingtime": 60,
+    "rating": 7.8
+  },
+  {
+    "id": "241724",
+    "name": "Villagers",
+    "year": 2019,
+    "thumbnail": "https://cf.geekdo-images.com/rMMSvnXuBPZSihIaVtVT-A__small/img/IkNfLIRXNN3cwFLItdj56VnREm0=/fit-in/200x150/filters:strip_icc()/pic4996383.png",
+    "image": "https://cf.geekdo-images.com/rMMSvnXuBPZSihIaVtVT-A__original/img/PivWbEOFSDhHXl2NCHw8xSErORA=/0x0/filters:format(png)/pic4996383.png",
+    "minplayers": 1,
+    "maxplayers": 5,
+    "playingtime": 60,
+    "rating": 7.1
+  },
+  {
+    "id": "258074",
+    "name": "Volfyirion",
+    "year": 2019,
+    "thumbnail": "https://cf.geekdo-images.com/Aj8NuGnzNWI45MgaRd8pMA__small/img/J3_x_DaWZ2atpzfFM3yYVLSzAgg=/fit-in/200x150/filters:strip_icc()/pic4653586.jpg",
+    "image": "https://cf.geekdo-images.com/Aj8NuGnzNWI45MgaRd8pMA__original/img/jDsr53kl248Hb-9nrzN_MAwHhH4=/0x0/filters:format(jpeg)/pic4653586.jpg",
+    "minplayers": 1,
+    "maxplayers": 2,
+    "playingtime": 30,
+    "rating": 7.2
+  },
+  {
+    "id": "266192",
+    "name": "Wingspan",
+    "year": 2019,
+    "thumbnail": "https://cf.geekdo-images.com/yLZJCVLlIx4c7eJEWUNJ7w__small/img/VNToqgS2-pOGU6MuvIkMPKn_y-s=/fit-in/200x150/filters:strip_icc()/pic4458123.jpg",
+    "image": "https://cf.geekdo-images.com/yLZJCVLlIx4c7eJEWUNJ7w__original/img/cI782Zis9cT66j2MjSHKJGnFPNw=/0x0/filters:format(jpeg)/pic4458123.jpg",
+    "minplayers": 1,
+    "maxplayers": 5,
+    "playingtime": 70,
+    "rating": 8.0
+  },
+  {
+    "id": "311193",
+    "name": "Anno 1800: The Board Game",
+    "year": 2020,
+    "thumbnail": "https://cf.geekdo-images.com/B21RQfIBnt2A_CYq8iZvrg__small/img/CtIlRyLdXN0b3TC8nM_8KZCrlN8=/fit-in/200x150/filters:strip_icc()/pic6220821.jpg",
+    "image": "https://cf.geekdo-images.com/B21RQfIBnt2A_CYq8iZvrg__original/img/UXIVL5GrcjSmLRQwjCa-8fviulU=/0x0/filters:format(jpeg)/pic6220821.jpg",
+    "minplayers": 2,
+    "maxplayers": 4,
+    "playingtime": 120,
+    "rating": 7.7
+  },
+  {
+    "id": "284936",
+    "name": "Café",
+    "year": 2020,
+    "thumbnail": "https://cf.geekdo-images.com/_k736Etdsm6zTTOnF3RXYw__small/img/Ux0zQYYi1zO7fjbrUZ9LIrmiRAU=/fit-in/200x150/filters:strip_icc()/pic5410171.jpg",
+    "image": "https://cf.geekdo-images.com/_k736Etdsm6zTTOnF3RXYw__original/img/tD_Y2Snn8smL3DfwPgzIt-dZDJA=/0x0/filters:format(jpeg)/pic5410171.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 45,
+    "rating": 7.1
+  },
+  {
+    "id": "316554",
+    "name": "Dune: Imperium",
+    "year": 2020,
+    "thumbnail": "https://cf.geekdo-images.com/PhjygpWSo-0labGrPBMyyg__small/img/JGgY-nBmkyB8WRp8vcoBLlNMQ5U=/fit-in/200x150/filters:strip_icc()/pic5666597.jpg",
+    "image": "https://cf.geekdo-images.com/PhjygpWSo-0labGrPBMyyg__original/img/mZzaBAEEJpMlHWWmC0R6Su0OibQ=/0x0/filters:format(jpeg)/pic5666597.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 120,
+    "rating": 8.4
+  },
+  {
+    "id": "291457",
+    "name": "Gloomhaven: Jaws of the Lion",
+    "year": 2020,
+    "thumbnail": "https://cf.geekdo-images.com/_HhIdavYW-hid20Iq3hhmg__small/img/OMkN_E5eyWrkID_cHCnQEbIixGM=/fit-in/200x150/filters:strip_icc()/pic5055631.jpg",
+    "image": "https://cf.geekdo-images.com/_HhIdavYW-hid20Iq3hhmg__original/img/PBzsLRqNKQKJxGnzpb7o3qLWPQM=/0x0/filters:format(jpeg)/pic5055631.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 120,
+    "rating": 8.4
+  },
+  {
+    "id": "284378",
+    "name": "Kanban EV",
+    "year": 2020,
+    "thumbnail": "https://cf.geekdo-images.com/L2Wn-zUqkcHgqvwvY212Ig__small/img/RQunBacBw949DkYBgzoS5YaXgJo=/fit-in/200x150/filters:strip_icc()/pic4924232.jpg",
+    "image": "https://cf.geekdo-images.com/L2Wn-zUqkcHgqvwvY212Ig__original/img/Htra4hvxjBlejtNEIUns_B3CNNc=/0x0/filters:format(jpeg)/pic4924232.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 180,
+    "rating": 8.4
+  },
+  {
+    "id": "312484",
+    "name": "Lost Ruins of Arnak",
+    "year": 2020,
+    "thumbnail": "https://cf.geekdo-images.com/6GqH14TJJhza86BX5HCLEQ__small/img/J8SVmGOJXZGxNjkT3xYNQU7Haxg=/fit-in/200x150/filters:strip_icc()/pic5674958.jpg",
+    "image": "https://cf.geekdo-images.com/6GqH14TJJhza86BX5HCLEQ__original/img/CXqwimJPonWy1oyXEMgPN_ZVmUI=/0x0/filters:format(jpeg)/pic5674958.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 120,
+    "rating": 8.1
+  },
+  {
+    "id": "311715",
+    "name": "Mini Rogue",
+    "year": 2020,
+    "thumbnail": "https://cf.geekdo-images.com/p74gLVRjxJ3JfhCmkwY6bg__small/img/LL3UB6wyOVzr7ZjktXN1WLTCe88=/fit-in/200x150/filters:strip_icc()/pic6336146.jpg",
+    "image": "https://cf.geekdo-images.com/p74gLVRjxJ3JfhCmkwY6bg__original/img/t-km31rJP52OE-_grpcZNFWN-tU=/0x0/filters:format(jpeg)/pic6336146.jpg",
+    "minplayers": 1,
+    "maxplayers": 2,
+    "playingtime": 45,
+    "rating": 7.3
+  },
+  {
+    "id": "300531",
+    "name": "Paleo",
+    "year": 2020,
+    "thumbnail": "https://cf.geekdo-images.com/85t1wkwgvh3d2mmjsRcDrw__small/img/K1IMVdd39Or51HpLAfiXz3JNUvI=/fit-in/200x150/filters:strip_icc()/pic6039256.jpg",
+    "image": "https://cf.geekdo-images.com/85t1wkwgvh3d2mmjsRcDrw__original/img/ejYTb1MVpf9optjLWlwbYua0TMk=/0x0/filters:format(jpeg)/pic6039256.jpg",
+    "minplayers": 2,
+    "maxplayers": 4,
+    "playingtime": 60,
+    "rating": 7.6
+  },
+  {
+    "id": "291962",
+    "name": "Paper Dungeons: A Dungeon Scrawler Game",
+    "year": 2020,
+    "thumbnail": "https://cf.geekdo-images.com/HCX-DAB544miK-cAoxNy3A__small/img/ZPgoWzIkeGKtjH1FkK2nj5tHqa8=/fit-in/200x150/filters:strip_icc()/pic5702613.png",
+    "image": "https://cf.geekdo-images.com/HCX-DAB544miK-cAoxNy3A__original/img/_-XrFB7kx_nmcDHko8JuDco4jt0=/0x0/filters:format(png)/pic5702613.png",
+    "minplayers": 1,
+    "maxplayers": 8,
+    "playingtime": 30,
+    "rating": 7.1
+  },
+  {
+    "id": "309142",
+    "name": "Port Arthur",
+    "year": 2020,
+    "thumbnail": "https://cf.geekdo-images.com/-i58GGcpT562wV_PDlIg4Q__small/img/JijL255kwFd-mV0S6l-NwN8fBgo=/fit-in/200x150/filters:strip_icc()/pic6991100.jpg",
+    "image": "https://cf.geekdo-images.com/-i58GGcpT562wV_PDlIg4Q__original/img/SaWUF3YC6Wol9jMXwO7uyWvBwh4=/0x0/filters:format(jpeg)/pic6991100.jpg",
+    "minplayers": 2,
+    "maxplayers": 2,
+    "playingtime": 75,
+    "rating": 7.1
+  },
+  {
+    "id": "307002",
+    "name": "Regicide",
+    "year": 2020,
+    "thumbnail": "https://cf.geekdo-images.com/C9U2E51tkzLljewFEGQ74g__small/img/4KV3wj3NiJDgGTh3zmW0_8Ph3Zc=/fit-in/200x150/filters:strip_icc()/pic5837347.jpg",
+    "image": "https://cf.geekdo-images.com/C9U2E51tkzLljewFEGQ74g__original/img/Q-a5lAydzhwNLLhy8n326tlxuYE=/0x0/filters:format(jpeg)/pic5837347.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 30,
+    "rating": 7.4
+  },
+  {
+    "id": "311465",
+    "name": "Roll & Raid",
+    "year": 2020,
+    "thumbnail": "https://cf.geekdo-images.com/D-K9YbJdDUsCj_pJSQljqg__small/img/iTLR6zEal40jCW6CaFJ7csJv-Qc=/fit-in/200x150/filters:strip_icc()/pic5541442.jpg",
+    "image": "https://cf.geekdo-images.com/D-K9YbJdDUsCj_pJSQljqg__original/img/n06RTkaVukFrRV4GVNkQehOV2Qo=/0x0/filters:format(jpeg)/pic5541442.jpg",
+    "minplayers": 1,
+    "maxplayers": 6,
+    "playingtime": 60,
+    "rating": 7.4
+  },
+  {
+    "id": "274037",
+    "name": "Solar Storm",
+    "year": 2020,
+    "thumbnail": "https://cf.geekdo-images.com/irErlpcjcOjOdRc7a5ftqA__small/img/mJziTE2wwMju6KcbJc2wQI4F96w=/fit-in/200x150/filters:strip_icc()/pic4608845.jpg",
+    "image": "https://cf.geekdo-images.com/irErlpcjcOjOdRc7a5ftqA__original/img/WF5KMUGIkgicPG_FbGanMfC21dM=/0x0/filters:format(jpeg)/pic4608845.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 60,
+    "rating": 6.9
+  },
+  {
+    "id": "316412",
+    "name": "The LOOP",
+    "year": 2020,
+    "thumbnail": "https://cf.geekdo-images.com/NPWdxDD5uLOBLBDdVgdLvA__small/img/7464PJPFWWPzsOUMvf8t860zct0=/fit-in/200x150/filters:strip_icc()/pic6034093.png",
+    "image": "https://cf.geekdo-images.com/NPWdxDD5uLOBLBDdVgdLvA__original/img/zlx0Qqcgt0TLu62F5sKUmYTDNvc=/0x0/filters:format(png)/pic6034093.png",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 60,
+    "rating": 7.7
+  },
+  {
+    "id": "301030",
+    "name": "The Ming Voyages",
+    "year": 2020,
+    "thumbnail": "https://cf.geekdo-images.com/FGOTVlV4mTEFE-Ahrr8ECA__small/img/E0Ai_dfzLF5ZywTeu2Q2P7LP968=/fit-in/200x150/filters:strip_icc()/pic5300237.jpg",
+    "image": "https://cf.geekdo-images.com/FGOTVlV4mTEFE-Ahrr8ECA__original/img/mJkyhjHUJ-yA1ISJz3iuI4AjWIs=/0x0/filters:format(jpeg)/pic5300237.jpg",
+    "minplayers": 1,
+    "maxplayers": 2,
+    "playingtime": 30,
+    "rating": 6.9
+  },
+  {
+    "id": "227224",
+    "name": "The Red Cathedral",
+    "year": 2020,
+    "thumbnail": "https://cf.geekdo-images.com/-PuiCnbxlBzMSjnUegp9AQ__small/img/CKamYUPlBDXav4A1AEqMRy976fY=/fit-in/200x150/filters:strip_icc()/pic5556025.jpg",
+    "image": "https://cf.geekdo-images.com/-PuiCnbxlBzMSjnUegp9AQ__original/img/hH1AwTR4fdtYY_cO8IYp1-I8dhE=/0x0/filters:format(jpeg)/pic5556025.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 80,
+    "rating": 7.7
+  },
+  {
+    "id": "291508",
+    "name": "Tiny Epic Dinosaurs",
+    "year": 2020,
+    "thumbnail": "https://cf.geekdo-images.com/iHH85cDgyfTdoM4BQddhKw__small/img/3Gp_7vSRpXHkaZqJhNeUQthcOeQ=/fit-in/200x150/filters:strip_icc()/pic4995784.jpg",
+    "image": "https://cf.geekdo-images.com/iHH85cDgyfTdoM4BQddhKw__original/img/lVcNkceUfMA8pf1bLPnjJOp0mYE=/0x0/filters:format(jpeg)/pic4995784.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 60,
+    "rating": 7.3
+  },
+  {
+    "id": "288513",
+    "name": "Tranquility",
+    "year": 2020,
+    "thumbnail": "https://cf.geekdo-images.com/nQJ9Kr9BP7zdm__rSvrx3w__small/img/8YdbYqiyOw64OzqvXpWGzHb2Xr0=/fit-in/200x150/filters:strip_icc()/pic6152802.png",
+    "image": "https://cf.geekdo-images.com/nQJ9Kr9BP7zdm__rSvrx3w__original/img/ryAqjh1RzofMQXC77hyqMFVpNV8=/0x0/filters:format(png)/pic6152802.png",
+    "minplayers": 1,
+    "maxplayers": 5,
+    "playingtime": 20,
+    "rating": 6.9
+  },
+  {
+    "id": "290359",
+    "name": "Undaunted: North Africa",
+    "year": 2020,
+    "thumbnail": "https://cf.geekdo-images.com/Zp0x_lURkRrHcLyyYv2aSw__small/img/d9luLahO6n0itCfqpjpLexz24OE=/fit-in/200x150/filters:strip_icc()/pic5536142.jpg",
+    "image": "https://cf.geekdo-images.com/Zp0x_lURkRrHcLyyYv2aSw__original/img/xk-EPbXMZ8ut9LAMobKNsro6cSw=/0x0/filters:format(jpeg)/pic5536142.jpg",
+    "minplayers": 2,
+    "maxplayers": 2,
+    "playingtime": 60,
+    "rating": 7.8
+  },
+  {
+    "id": "300583",
+    "name": "Village Green",
+    "year": 2020,
+    "thumbnail": "https://cf.geekdo-images.com/T1O8_-6iPUDL3kn_Kh770A__small/img/qzHVyKGu78rAlUJxR-NxmetvE7A=/fit-in/200x150/filters:strip_icc()/pic5207472.jpg",
+    "image": "https://cf.geekdo-images.com/T1O8_-6iPUDL3kn_Kh770A__original/img/SwNSUwudNY7mOHX3Pxx8DUiCEk0=/0x0/filters:format(jpeg)/pic5207472.jpg",
+    "minplayers": 1,
+    "maxplayers": 5,
+    "playingtime": 30,
+    "rating": 6.9
+  },
+  {
+    "id": "296151",
+    "name": "Viscounts of the West Kingdom",
+    "year": 2020,
+    "thumbnail": "https://cf.geekdo-images.com/kMgSC_kRlJWt3KLj5y0BxQ__small/img/2uNYQn2vHuNGrx5-dxc1h7Mh7Do=/fit-in/200x150/filters:strip_icc()/pic5230695.png",
+    "image": "https://cf.geekdo-images.com/kMgSC_kRlJWt3KLj5y0BxQ__original/img/t9ccf6x3PQiL5Cqn4-mePKUNC-E=/0x0/filters:format(png)/pic5230695.png",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 90,
+    "rating": 7.8
+  },
+  {
+    "id": "296237",
+    "name": "Warp's Edge",
+    "year": 2020,
+    "thumbnail": "https://cf.geekdo-images.com/4W5U-pDY26c8J-dFj0zcpw__small/img/8x1nNSSoupbep3O27SFeKB5QOaQ=/fit-in/200x150/filters:strip_icc()/pic5115890.png",
+    "image": "https://cf.geekdo-images.com/4W5U-pDY26c8J-dFj0zcpw__original/img/ub4d2qfYUacICsAxiw2lM9iytxY=/0x0/filters:format(png)/pic5115890.png",
+    "minplayers": 1,
+    "maxplayers": 1,
+    "playingtime": 45,
+    "rating": 7.6
+  },
+  {
+    "id": "298371",
+    "name": "Wild Space",
+    "year": 2020,
+    "thumbnail": "https://cf.geekdo-images.com/eDP1Lt1p3uz5zltkbR1uFw__small/img/LQc2mop2nRhnNaLgeHKXoXfr8bU=/fit-in/200x150/filters:strip_icc()/pic6026887.png",
+    "image": "https://cf.geekdo-images.com/eDP1Lt1p3uz5zltkbR1uFw__original/img/arxIHhTx1VzOpymCRfOv2AhHP5Y=/0x0/filters:format(png)/pic6026887.png",
+    "minplayers": 1,
+    "maxplayers": 5,
+    "playingtime": 40,
+    "rating": 7.1
+  },
+  {
+    "id": "314088",
+    "name": "Agropolis",
+    "year": 2021,
+    "thumbnail": "https://cf.geekdo-images.com/KcE2t-zmo-p-POO8fPTUmA__small/img/Atmy64jQdwgenpROZdR35HLdM5A=/fit-in/200x150/filters:strip_icc()/pic5674430.png",
+    "image": "https://cf.geekdo-images.com/KcE2t-zmo-p-POO8fPTUmA__original/img/C6HMgkML2-KMopI_T4ZfbvvgIJM=/0x0/filters:format(png)/pic5674430.png",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 20,
+    "rating": 7.2
+  },
+  {
+    "id": "342942",
+    "name": "Ark Nova",
+    "year": 2021,
+    "thumbnail": "https://cf.geekdo-images.com/SoU8p28Sk1s8MSvoM4N8pQ__small/img/4KuHNTWSMPf8vTNDKSRMMI3oOv8=/fit-in/200x150/filters:strip_icc()/pic6293412.jpg",
+    "image": "https://cf.geekdo-images.com/SoU8p28Sk1s8MSvoM4N8pQ__original/img/g4S18szTdrXCdIwVKzMKrZrYAcM=/0x0/filters:format(jpeg)/pic6293412.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 150,
+    "rating": 8.5
+  },
+  {
+    "id": "323612",
+    "name": "Bitoku",
+    "year": 2021,
+    "thumbnail": "https://cf.geekdo-images.com/sMP4YfVfwv6vvh_y7EcXzA__small/img/FelEz-syYFGhxLBVeXG_SQPCWRQ=/fit-in/200x150/filters:strip_icc()/pic6182978.jpg",
+    "image": "https://cf.geekdo-images.com/sMP4YfVfwv6vvh_y7EcXzA__original/img/SdMc8sjTpcN8I15uZ_RmKdhLIkY=/0x0/filters:format(jpeg)/pic6182978.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 120,
+    "rating": 7.8
+  },
+  {
+    "id": "273330",
+    "name": "Bloodborne: The Board Game",
+    "year": 2021,
+    "thumbnail": "https://cf.geekdo-images.com/clKFvn2bUUPbY62eSmc-ig__small/img/q6y67Y5CknBEAwgkfAaGRxo26CQ=/fit-in/200x150/filters:strip_icc()/pic4757839.png",
+    "image": "https://cf.geekdo-images.com/clKFvn2bUUPbY62eSmc-ig__original/img/Ftulo3vFiGUJaRsW9TOif-ViyDg=/0x0/filters:format(png)/pic4757839.png",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 75,
+    "rating": 7.7
+  },
+  {
+    "id": "314503",
+    "name": "Codex Naturalis",
+    "year": 2021,
+    "thumbnail": "https://cf.geekdo-images.com/0I7U0tz-RgpIFWWco5FKLA__small/img/idWdk9oQtUtvE7G_WwWUa7qoYNE=/fit-in/200x150/filters:strip_icc()/pic5612161.png",
+    "image": "https://cf.geekdo-images.com/0I7U0tz-RgpIFWWco5FKLA__original/img/BeNJf5TlpTDS56qdhL1lpjiyMmc=/0x0/filters:format(png)/pic5612161.png",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 30,
+    "rating": 7.2
+  },
+  {
+    "id": "322703",
+    "name": "Death Valley",
+    "year": 2021,
+    "thumbnail": "https://cf.geekdo-images.com/aDs97Vr3NP_vc-bg-w1jzw__small/img/SF4O-o1F_5TpdJPXtPU32nL595M=/fit-in/200x150/filters:strip_icc()/pic8807033.png",
+    "image": "https://cf.geekdo-images.com/aDs97Vr3NP_vc-bg-w1jzw__original/img/EdeCTTIqIn85_BPehdPfnEGXdao=/0x0/filters:format(png)/pic8807033.png",
+    "minplayers": 1,
+    "maxplayers": 2,
+    "playingtime": 15,
+    "rating": 6.7
+  },
+  {
+    "id": "293207",
+    "name": "Eila and Something Shiny",
+    "year": 2021,
+    "thumbnail": "https://cf.geekdo-images.com/ddeXV_p59xHZJtIyNSclvg__small/img/LnGEEwnCNfGjR9JEgCf2xAoi3no=/fit-in/200x150/filters:strip_icc()/pic5391049.jpg",
+    "image": "https://cf.geekdo-images.com/ddeXV_p59xHZJtIyNSclvg__original/img/tZc2EYPuGTzURBV786LypUP8Cvs=/0x0/filters:format(jpeg)/pic5391049.jpg",
+    "minplayers": 1,
+    "maxplayers": 1,
+    "playingtime": 45,
+    "rating": 7.9
+  },
+  {
+    "id": "277659",
+    "name": "Final Girl",
+    "year": 2021,
+    "thumbnail": "https://cf.geekdo-images.com/TUtzY-F7gKTIKm9y8e1AQw__small/img/CVgcWusAt0oVteoy0XYmsFmhfQY=/fit-in/200x150/filters:strip_icc()/pic6520382.jpg",
+    "image": "https://cf.geekdo-images.com/TUtzY-F7gKTIKm9y8e1AQw__original/img/vpBmnZOOyLZA4va7N6S8j9NyGPQ=/0x0/filters:format(jpeg)/pic6520382.jpg",
+    "minplayers": 1,
+    "maxplayers": 1,
+    "playingtime": 60,
+    "rating": 8.2
+  },
+  {
+    "id": "334590",
+    "name": "For Northwood! A Solo Trick-Taking Game",
+    "year": 2021,
+    "thumbnail": "https://cf.geekdo-images.com/3MdUGB8YD_jGTDyfbAnX9Q__small/img/c41bbBRd7BC3KKqLFdKb6URXzsA=/fit-in/200x150/filters:strip_icc()/pic6763912.png",
+    "image": "https://cf.geekdo-images.com/3MdUGB8YD_jGTDyfbAnX9Q__original/img/fk3OXO3thTH0fTJ-SYJAqav9BIk=/0x0/filters:format(png)/pic6763912.png",
+    "minplayers": 1,
+    "maxplayers": 1,
+    "playingtime": 30,
+    "rating": 7.8
+  },
+  {
+    "id": "341169",
+    "name": "Great Western Trail: Second Edition",
+    "year": 2021,
+    "thumbnail": "https://cf.geekdo-images.com/gDn7AhrDlmfCLSz9ZqoNFQ__small/img/0pt6XrFHTXpNetwMo9rdY7PdhfQ=/fit-in/200x150/filters:strip_icc()/pic5988511.jpg",
+    "image": "https://cf.geekdo-images.com/gDn7AhrDlmfCLSz9ZqoNFQ__original/img/yecB1xO32nnjBAyskVOTq9LBuLo=/0x0/filters:format(jpeg)/pic5988511.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 150,
+    "rating": 8.3
+  },
+  {
+    "id": "318184",
+    "name": "Imperium: Classics",
+    "year": 2021,
+    "thumbnail": "https://cf.geekdo-images.com/MN0OvKejfrfwD6bupQHp4g__small/img/MVh7xtQ4l17hprI4mFIk9Kswk6s=/fit-in/200x150/filters:strip_icc()/pic5623566.jpg",
+    "image": "https://cf.geekdo-images.com/MN0OvKejfrfwD6bupQHp4g__original/img/AYYyjw10ExHhOFLYectIclqQnxI=/0x0/filters:format(jpeg)/pic5623566.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 160,
+    "rating": 7.7
+  },
+  {
+    "id": "318182",
+    "name": "Imperium: Legends",
+    "year": 2021,
+    "thumbnail": "https://cf.geekdo-images.com/-6AnQ0BuCM8u1lqAwTe8Rw__small/img/da5eYCvhYSmPb03hEhNwxR8-s6g=/fit-in/200x150/filters:strip_icc()/pic5623567.jpg",
+    "image": "https://cf.geekdo-images.com/-6AnQ0BuCM8u1lqAwTe8Rw__original/img/3isy4jQQdEpy8D-JKV2zLxrUjs8=/0x0/filters:format(jpeg)/pic5623567.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 160,
+    "rating": 7.8
+  },
+  {
+    "id": "314491",
+    "name": "Meadow",
+    "year": 2021,
+    "thumbnail": "https://cf.geekdo-images.com/9r3qdPijtgoIN24PxFU2gw__small/img/tugW5aKyC6Vs31QaBX8YvmQiPTQ=/fit-in/200x150/filters:strip_icc()/pic5894745.jpg",
+    "image": "https://cf.geekdo-images.com/9r3qdPijtgoIN24PxFU2gw__original/img/tHQTKwwk4N8J5fpWhsoE8t0FQhw=/0x0/filters:format(jpeg)/pic5894745.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 90,
+    "rating": 7.7
+  },
+  {
+    "id": "277700",
+    "name": "Merchants Cove",
+    "year": 2021,
+    "thumbnail": "https://cf.geekdo-images.com/-JD8JLncWYMes9Q6YIgorg__small/img/Ce6a64m5DxVae_ZXnAsrgdEnqBQ=/fit-in/200x150/filters:strip_icc()/pic6136538.jpg",
+    "image": "https://cf.geekdo-images.com/-JD8JLncWYMes9Q6YIgorg__original/img/HkR7hlj4qqYD1oUvKXeyCLKjsKE=/0x0/filters:format(jpeg)/pic6136538.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 90,
+    "rating": 7.4
+  },
+  {
+    "id": "300751",
+    "name": "Mini Express",
+    "year": 2021,
+    "thumbnail": "https://cf.geekdo-images.com/VN2KUKs_Kgfq2LrobCC87g__small/img/7qNG7SdjNMQM0Ujbt2d1C61mWa4=/fit-in/200x150/filters:strip_icc()/pic5333823.jpg",
+    "image": "https://cf.geekdo-images.com/VN2KUKs_Kgfq2LrobCC87g__original/img/aOMianmjDmnmXfHoHn6nKzmC6AA=/0x0/filters:format(jpeg)/pic5333823.jpg",
+    "minplayers": 1,
+    "maxplayers": 5,
+    "playingtime": 45,
+    "rating": 7.3
+  },
+  {
+    "id": "293835",
+    "name": "Oltréé",
+    "year": 2021,
+    "thumbnail": "https://cf.geekdo-images.com/oRvBhsKMNDWdGtfccvGANg__small/img/ERE-7EhwiZ0fGp_I3zylLft9_Rk=/fit-in/200x150/filters:strip_icc()/pic6452865.png",
+    "image": "https://cf.geekdo-images.com/oRvBhsKMNDWdGtfccvGANg__original/img/rGqtpDXQ2OQaw9Pp52mBswW7SJY=/0x0/filters:format(png)/pic6452865.png",
+    "minplayers": 2,
+    "maxplayers": 4,
+    "playingtime": 60,
+    "rating": 7.5
+  },
+  {
+    "id": "319263",
+    "name": "One Card Dungeon",
+    "year": 2021,
+    "thumbnail": "https://cf.geekdo-images.com/V52qZMZfQLzbPBCLrkez2A__small/img/KSNcHMaFgmDKo7CLfTpktdD1PGU=/fit-in/200x150/filters:strip_icc()/pic5754659.jpg",
+    "image": "https://cf.geekdo-images.com/V52qZMZfQLzbPBCLrkez2A__original/img/Y6ukBbGJIgq9jYptMR9d8atvFxM=/0x0/filters:format(jpeg)/pic5754659.jpg",
+    "minplayers": 1,
+    "maxplayers": 1,
+    "playingtime": 60,
+    "rating": 6.7
+  },
+  {
+    "id": "255984",
+    "name": "Sleeping Gods",
+    "year": 2021,
+    "thumbnail": "https://cf.geekdo-images.com/Zdt8l4oTBpFICsMyNof7Jg__small/img/71w4Tt3xOnuDEDTCG8ni63QUhVE=/fit-in/200x150/filters:strip_icc()/pic5975244.png",
+    "image": "https://cf.geekdo-images.com/Zdt8l4oTBpFICsMyNof7Jg__original/img/-okZ810RkA8fKKhIeZyX4cnqmbE=/0x0/filters:format(png)/pic5975244.png",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 1200,
+    "rating": 8.1
+  },
+  {
+    "id": "323156",
+    "name": "Stroganov",
+    "year": 2021,
+    "thumbnail": "https://cf.geekdo-images.com/o7CUpHZLvw5vuwRCqPZMHw__small/img/ieOsIj7QyKes1F5jw8bJsXFyl3M=/fit-in/200x150/filters:strip_icc()/pic5827215.jpg",
+    "image": "https://cf.geekdo-images.com/o7CUpHZLvw5vuwRCqPZMHw__original/img/Em35adNA6vzdSSdQ74HUazuMkUY=/0x0/filters:format(jpeg)/pic5827215.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 90,
+    "rating": 7.3
+  },
+  {
+    "id": "331787",
+    "name": "Tiny Epic Dungeons",
+    "year": 2021,
+    "thumbnail": "https://cf.geekdo-images.com/rDOnDFAwGXi_fVsfp-ZCqw__small/img/azj8SnpTtQHp1C7W1QoO8y9yyys=/fit-in/200x150/filters:strip_icc()/pic6029065.jpg",
+    "image": "https://cf.geekdo-images.com/rDOnDFAwGXi_fVsfp-ZCqw__original/img/lwHbQBPyDT4g7pakY-Oix1c-A5I=/0x0/filters:format(jpeg)/pic6029065.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 60,
+    "rating": 7.4
+  },
+  {
+    "id": "347600",
+    "name": "1212 Las Navas de Tolosa",
+    "year": 2022,
+    "thumbnail": "https://cf.geekdo-images.com/sp9kKYF5tCiAyEZhCEFvaw__small/img/oh6DrJm7ELFBFSGDb8gYI8rhio4=/fit-in/200x150/filters:strip_icc()/pic6573259.jpg",
+    "image": "https://cf.geekdo-images.com/sp9kKYF5tCiAyEZhCEFvaw__original/img/RzzRBYbZ5ukp9IaksVrcsxu14Bs=/0x0/filters:format(jpeg)/pic6573259.jpg",
+    "minplayers": 2,
+    "maxplayers": 2,
+    "playingtime": 45,
+    "rating": 7.3
+  },
+  {
+    "id": "325810",
+    "name": "Ascension: 10 Year Anniversary Edition",
+    "year": 2022,
+    "thumbnail": "https://cf.geekdo-images.com/WAVSY1esA_LxaQ1bSOYItA__small/img/sE95S6P4r8Ewc9w3K7zulTUXdHQ=/fit-in/200x150/filters:strip_icc()/pic6276455.png",
+    "image": "https://cf.geekdo-images.com/WAVSY1esA_LxaQ1bSOYItA__original/img/9UhDaL6TjFRcp4guqq1I6Px_1Zg=/0x0/filters:format(png)/pic6276455.png",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 30,
+    "rating": 7.8
+  },
+  {
+    "id": "310873",
+    "name": "Carnegie",
+    "year": 2022,
+    "thumbnail": "https://cf.geekdo-images.com/0qxz9DRRhsJrIW1TJ-kz0w__small/img/ma4yc5wbMVrfbg9r21-LxGVwRKw=/fit-in/200x150/filters:strip_icc()/pic5710736.jpg",
+    "image": "https://cf.geekdo-images.com/0qxz9DRRhsJrIW1TJ-kz0w__original/img/PzsJsCLfGGo4IG3v43VPvH_etPw=/0x0/filters:format(jpeg)/pic5710736.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 120,
+    "rating": 8.0
+  },
+  {
+    "id": "304051",
+    "name": "Creature Comforts",
+    "year": 2022,
+    "thumbnail": "https://cf.geekdo-images.com/A0ZRM7_H6ecCQ8-lW0MtQQ__small/img/F8ELDsdUdbTvFWmYw1CZjqAWl0Y=/fit-in/200x150/filters:strip_icc()/pic5799638.jpg",
+    "image": "https://cf.geekdo-images.com/A0ZRM7_H6ecCQ8-lW0MtQQ__original/img/VcraEiTpK1jfGuU_A3-UiaH-cZI=/0x0/filters:format(jpeg)/pic5799638.jpg",
+    "minplayers": 1,
+    "maxplayers": 5,
+    "playingtime": 45,
+    "rating": 7.4
+  },
+  {
+    "id": "360206",
+    "name": "Discordia",
+    "year": 2022,
+    "thumbnail": "https://cf.geekdo-images.com/VkCBFlvAAHvaUk84H9usDg__small/img/9Q9MA7yu6uHVmKiiBZo_qlGy8Ac=/fit-in/200x150/filters:strip_icc()/pic6797734.jpg",
+    "image": "https://cf.geekdo-images.com/VkCBFlvAAHvaUk84H9usDg__original/img/-JE6a6OIHZeU8doazKlzudEI3uk=/0x0/filters:format(jpeg)/pic6797734.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 90,
+    "rating": 7.4
+  },
+  {
+    "id": "370591",
+    "name": "Dorfromantik: The Board Game",
+    "year": 2022,
+    "thumbnail": "https://cf.geekdo-images.com/Nqw3SzV4JDd64lcDgytPEg__small/img/SYowoPc4NsBcU6duKGUM93itzZY=/fit-in/200x150/filters:strip_icc()/pic7227691.jpg",
+    "image": "https://cf.geekdo-images.com/Nqw3SzV4JDd64lcDgytPEg__original/img/CK6xh0d01jIC7WOIGALHZCDli34=/0x0/filters:format(jpeg)/pic7227691.jpg",
+    "minplayers": 1,
+    "maxplayers": 6,
+    "playingtime": 60,
+    "rating": 7.6
+  },
+  {
+    "id": "305096",
+    "name": "Endless Winter: Paleoamericans",
+    "year": 2022,
+    "thumbnail": "https://cf.geekdo-images.com/TFX_awTwbJxoG74GtRHytw__small/img/gUl5oqRjGtrEIBlTDCDnfm_m1Wg=/fit-in/200x150/filters:strip_icc()/pic5624523.jpg",
+    "image": "https://cf.geekdo-images.com/TFX_awTwbJxoG74GtRHytw__original/img/plU9ZhUubz-1LHGfbsDstEOE9vg=/0x0/filters:format(jpeg)/pic5624523.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 120,
+    "rating": 7.6
+  },
+  {
+    "id": "336986",
+    "name": "Flamecraft",
+    "year": 2022,
+    "thumbnail": "https://cf.geekdo-images.com/EvGtnsBDcfnKiqSiXHothQ__small/img/bQcyvzYRdMFFvcdQkFVnIRiCPjE=/fit-in/200x150/filters:strip_icc()/pic6605448.jpg",
+    "image": "https://cf.geekdo-images.com/EvGtnsBDcfnKiqSiXHothQ__original/img/7yj8nA0ObuZ1w5AYCThEOK6meWA=/0x0/filters:format(jpeg)/pic6605448.jpg",
+    "minplayers": 1,
+    "maxplayers": 5,
+    "playingtime": 60,
+    "rating": 7.4
+  },
+  {
+    "id": "311988",
+    "name": "Frostpunk: The Board Game",
+    "year": 2022,
+    "thumbnail": "https://cf.geekdo-images.com/YYfgspTCAgBC0rqbD4U3pQ__small/img/y3eTVayRzfZrS5FPeh-egX_uFW8=/fit-in/200x150/filters:strip_icc()/pic7247536.jpg",
+    "image": "https://cf.geekdo-images.com/YYfgspTCAgBC0rqbD4U3pQ__original/img/vdnpP4PPsidTc7lBMnBBSujQMZc=/0x0/filters:format(jpeg)/pic7247536.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 150,
+    "rating": 8.1
+  },
+  {
+    "id": "373828",
+    "name": "Galdor's Grip",
+    "year": 2022,
+    "thumbnail": "https://cf.geekdo-images.com/YLIPYD88MhAggJKXaW8QSw__small/img/6KckrHDXrke47IlYNDjWmyfW39M=/fit-in/200x150/filters:strip_icc()/pic7183540.png",
+    "image": "https://cf.geekdo-images.com/YLIPYD88MhAggJKXaW8QSw__original/img/GQRiZVUVpEh2KaHDlm3Xn2DCnTg=/0x0/filters:format(png)/pic7183540.png",
+    "minplayers": 1,
+    "maxplayers": 1,
+    "playingtime": 45,
+    "rating": 7.9
+  },
+  {
+    "id": "315610",
+    "name": "Massive Darkness 2: Hellscape",
+    "year": 2022,
+    "thumbnail": "https://cf.geekdo-images.com/e-QmT0KuEc0E4bWNih6EVQ__small/img/Q1WD-ufxyF37HxWH5T6t8amKcqk=/fit-in/200x150/filters:strip_icc()/pic6107854.png",
+    "image": "https://cf.geekdo-images.com/e-QmT0KuEc0E4bWNih6EVQ__original/img/alQDRawS3Soxpe-sCU3_WBNUCNk=/0x0/filters:format(png)/pic6107854.png",
+    "minplayers": 1,
+    "maxplayers": 6,
+    "playingtime": 60,
+    "rating": 8.0
+  },
+  {
+    "id": "352697",
+    "name": "Resist!",
+    "year": 2022,
+    "thumbnail": "https://cf.geekdo-images.com/ICDi4yEj-mbEcx9QkW7_3A__small/img/I19zgPVlqJHgv_6PL3Beb7coKAg=/fit-in/200x150/filters:strip_icc()/pic6711822.jpg",
+    "image": "https://cf.geekdo-images.com/ICDi4yEj-mbEcx9QkW7_3A__original/img/Vj4VOFt3tsS07apDHfDqDfO4IMI=/0x0/filters:format(jpeg)/pic6711822.jpg",
+    "minplayers": 1,
+    "maxplayers": 1,
+    "playingtime": 40,
+    "rating": 7.4
+  },
+  {
+    "id": "332772",
+    "name": "Revive",
+    "year": 2022,
+    "thumbnail": "https://cf.geekdo-images.com/V0OZ9QR0pC9G5t5i9MoZTQ__small/img/NPtXuKlsnfPORSn6kpTcf-ZdEF0=/fit-in/200x150/filters:strip_icc()/pic6950224.jpg",
+    "image": "https://cf.geekdo-images.com/V0OZ9QR0pC9G5t5i9MoZTQ__original/img/NxxAoxVxMNkDGEkD3aoobPL14dI=/0x0/filters:format(jpeg)/pic6950224.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 120,
+    "rating": 8.1
+  },
+  {
+    "id": "360265",
+    "name": "Sabika",
+    "year": 2022,
+    "thumbnail": "https://cf.geekdo-images.com/6LOmh8RhQHLbnRY6I96tIQ__small/img/H4IWNZXlhHeAjZFXBAnCZVOhhL8=/fit-in/200x150/filters:strip_icc()/pic6820026.jpg",
+    "image": "https://cf.geekdo-images.com/6LOmh8RhQHLbnRY6I96tIQ__original/img/_vv4f6GzlXlPneHIcyxhEFtkm2w=/0x0/filters:format(jpeg)/pic6820026.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 120,
+    "rating": 7.7
+  },
+  {
+    "id": "359438",
+    "name": "Skymines",
+    "year": 2022,
+    "thumbnail": "https://cf.geekdo-images.com/loa-OQHFaTlKV2eU_WKVFw__small/img/Jsvw38z4mMfKZzKCDjiQRe7mJ9k=/fit-in/200x150/filters:strip_icc()/pic6800089.jpg",
+    "image": "https://cf.geekdo-images.com/loa-OQHFaTlKV2eU_WKVFw__original/img/x7qsiqjs4OLfVfrcvlMDIvyCuDA=/0x0/filters:format(jpeg)/pic6800089.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 150,
+    "rating": 7.9
+  },
+  {
+    "id": "350933",
+    "name": "The Guild of Merchant Explorers",
+    "year": 2022,
+    "thumbnail": "https://cf.geekdo-images.com/HZQAedsq10yAgotyNth4og__small/img/56IVwtzXk9WZz750cekqFYWw16g=/fit-in/200x150/filters:strip_icc()/pic6670587.jpg",
+    "image": "https://cf.geekdo-images.com/HZQAedsq10yAgotyNth4og__original/img/jTvjgU0WrhyTKWf0bDyMrhPqsdM=/0x0/filters:format(jpeg)/pic6670587.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 45,
+    "rating": 7.6
+  },
+  {
+    "id": "291845",
+    "name": "Three Sisters",
+    "year": 2022,
+    "thumbnail": "https://cf.geekdo-images.com/Z1ihG_FHEKuf1Et53f2Dzg__small/img/3LXpXcuoBQGQACl-Yw4fGqls2GM=/fit-in/200x150/filters:strip_icc()/pic6349029.png",
+    "image": "https://cf.geekdo-images.com/Z1ihG_FHEKuf1Et53f2Dzg__original/img/eMBOJ52H8z_POdRRC6_DKRIIp78=/0x0/filters:format(png)/pic6349029.png",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 60,
+    "rating": 7.5
+  },
+  {
+    "id": "351913",
+    "name": "Tiletum",
+    "year": 2022,
+    "thumbnail": "https://cf.geekdo-images.com/DvvSoTrB3-UMEgz2rBraHg__small/img/TnJONz9KNXPJBQ42sorXuoUTlew=/fit-in/200x150/filters:strip_icc()/pic7533289.jpg",
+    "image": "https://cf.geekdo-images.com/DvvSoTrB3-UMEgz2rBraHg__original/img/a70U9DGHGxiyo8WWMOb9Zd4hrxc=/0x0/filters:format(jpeg)/pic7533289.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 100,
+    "rating": 7.9
+  },
+  {
+    "id": "363503",
+    "name": "Unreliable Wizard",
+    "year": 2022,
+    "thumbnail": "https://cf.geekdo-images.com/rtFFtZSNGhBrvLuQSLZVGg__small/img/YRpwMwtp5Fyo8l41EIkk3iuSzVo=/fit-in/200x150/filters:strip_icc()/pic7949500.jpg",
+    "image": "https://cf.geekdo-images.com/rtFFtZSNGhBrvLuQSLZVGg__original/img/UxboQp1wJraMTqNyfW9lPy2uilE=/0x0/filters:format(jpeg)/pic7949500.jpg",
+    "minplayers": 1,
+    "maxplayers": 1,
+    "playingtime": 15,
+    "rating": 6.5
+  },
+  {
+    "id": "311900",
+    "name": "Votes for Women",
+    "year": 2022,
+    "thumbnail": "https://cf.geekdo-images.com/RotpVPn98B5sDSS8VTzTJQ__small/img/WZ5C_84yftaJFU3oprFzDHIRgV0=/fit-in/200x150/filters:strip_icc()/pic6430938.jpg",
+    "image": "https://cf.geekdo-images.com/RotpVPn98B5sDSS8VTzTJQ__original/img/wXzPP1T99-BfeEOj_yL4LHLq-FU=/0x0/filters:format(jpeg)/pic6430938.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 75,
+    "rating": 7.5
+  },
+  {
+    "id": "350316",
+    "name": "Wayfarers of the South Tigris",
+    "year": 2022,
+    "thumbnail": "https://cf.geekdo-images.com/bH-ThnratBE1MAB_KdgrWg__small/img/dCxGWUE0ReGJzdx3R_ZaOFwBWjE=/fit-in/200x150/filters:strip_icc()/pic7339734.jpg",
+    "image": "https://cf.geekdo-images.com/bH-ThnratBE1MAB_KdgrWg__original/img/FMbwKz_hXrfQEPVfYe8U2nIOwyQ=/0x0/filters:format(jpeg)/pic7339734.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 90,
+    "rating": 7.8
+  },
+  {
+    "id": "353411",
+    "name": "Wreckland Run",
+    "year": 2022,
+    "thumbnail": "https://cf.geekdo-images.com/0FReBVPEphUBKuMS33UMNw__small/img/t4a3_pYIIkFlpTYxN8-LF9PJNYM=/fit-in/200x150/filters:strip_icc()/pic6601696.jpg",
+    "image": "https://cf.geekdo-images.com/0FReBVPEphUBKuMS33UMNw__original/img/WHIM3nLo8jT6eyZOrmVMc9aWh3w=/0x0/filters:format(jpeg)/pic6601696.jpg",
+    "minplayers": 1,
+    "maxplayers": 1,
+    "playingtime": 45,
+    "rating": 7.1
+  },
+  {
+    "id": "371947",
+    "name": "3 Ring Circus",
+    "year": 2023,
+    "thumbnail": "https://cf.geekdo-images.com/rlVMW44IxSdXg0mfbdOdOg__small/img/-AEXgv7NazOF2KXxPb-KPuR1yvg=/fit-in/200x150/filters:strip_icc()/pic7819093.jpg",
+    "image": "https://cf.geekdo-images.com/rlVMW44IxSdXg0mfbdOdOg__original/img/0dv_H-9NXnu7aKwbZD0T9cHTHyw=/0x0/filters:format(jpeg)/pic7819093.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 75,
+    "rating": 7.2
+  },
+  {
+    "id": "383607",
+    "name": "Barcelona",
+    "year": 2023,
+    "thumbnail": "https://cf.geekdo-images.com/clBx1kfB-8OpO86B2-vsgg__small/img/8w625ctGlolYNodQdbXJtyOC3wg=/fit-in/200x150/filters:strip_icc()/pic7442376.jpg",
+    "image": "https://cf.geekdo-images.com/clBx1kfB-8OpO86B2-vsgg__original/img/4Wmp2fgPbYKAfL4UC3QXSv9YATM=/0x0/filters:format(jpeg)/pic7442376.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 90,
+    "rating": 7.7
+  },
+  {
+    "id": "389135",
+    "name": "Battles of Napoleonic Europe: A Solitaire Wargame",
+    "year": 2023,
+    "thumbnail": "https://cf.geekdo-images.com/Zkv5q8V2mtsza3PfA3eQSw__small/img/12CvFl8sWtPJ8KSCW1jsxYDWeic=/fit-in/200x150/filters:strip_icc()/pic8563393.png",
+    "image": "https://cf.geekdo-images.com/Zkv5q8V2mtsza3PfA3eQSw__original/img/oPL_nnzc3j3UOjnvG_SKO6-5gCE=/0x0/filters:format(png)/pic8563393.png",
+    "minplayers": 1,
+    "maxplayers": 1,
+    "playingtime": 50,
+    "rating": 8.2
+  },
+  {
+    "id": "362976",
+    "name": "Beacon Patrol",
+    "year": 2023,
+    "thumbnail": "https://cf.geekdo-images.com/9hDNHVLmorkaytg2ztLM6w__small/img/2dUdMpeeHEbAFEM9rOJOmkf_kjs=/fit-in/200x150/filters:strip_icc()/pic7439416.jpg",
+    "image": "https://cf.geekdo-images.com/9hDNHVLmorkaytg2ztLM6w__original/img/k5cnBMKBb94XWGhL0aEyYOlaWtQ=/0x0/filters:format(jpeg)/pic7439416.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 30,
+    "rating": 7.1
+  },
+  {
+    "id": "322289",
+    "name": "Darwin's Journey",
+    "year": 2023,
+    "thumbnail": "https://cf.geekdo-images.com/-A_ABjMw4PdoAZrH-FjiiA__small/img/_rJRtHzqatLg9OQM0x1UaC1cRGY=/fit-in/200x150/filters:strip_icc()/pic5726930.png",
+    "image": "https://cf.geekdo-images.com/-A_ABjMw4PdoAZrH-FjiiA__original/img/GuDlOog3eTRrkxCUzCEgRc17B-g=/0x0/filters:format(png)/pic5726930.png",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 120,
+    "rating": 8.1
+  },
+  {
+    "id": "381117",
+    "name": "Doggerland",
+    "year": 2023,
+    "thumbnail": "https://cf.geekdo-images.com/yNqt6FGQpKXpqycXMIo9nQ__small/img/C3EM1cEtne8HrKV6-R1X8inbMbs=/fit-in/200x150/filters:strip_icc()/pic8159521.jpg",
+    "image": "https://cf.geekdo-images.com/yNqt6FGQpKXpqycXMIo9nQ__original/img/vNhxJFsFIaJyiKI2RnlZSR6Qum0=/0x0/filters:format(jpeg)/pic8159521.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 120,
+    "rating": 7.7
+  },
+  {
+    "id": "350184",
+    "name": "Earth",
+    "year": 2023,
+    "thumbnail": "https://cf.geekdo-images.com/0xqF_KyOb7V26Lu5YT3fxw__small/img/ABTwzzMGekkz2jVl01LC4789TcQ=/fit-in/200x150/filters:strip_icc()/pic6699821.jpg",
+    "image": "https://cf.geekdo-images.com/0xqF_KyOb7V26Lu5YT3fxw__original/img/uqxMcj1QPt-U34drYdL6mmv2eos=/0x0/filters:format(jpeg)/pic6699821.jpg",
+    "minplayers": 1,
+    "maxplayers": 5,
+    "playingtime": 90,
+    "rating": 7.6
+  },
+  {
+    "id": "378731",
+    "name": "Fictions: Memoirs of a Gangster",
+    "year": 2023,
+    "thumbnail": "https://cf.geekdo-images.com/CT_QevMqwgC1smCTYItecA__small/img/BB7tp3eYU55PIp-s797S6ODYSIA=/fit-in/200x150/filters:strip_icc()/pic7547388.jpg",
+    "image": "https://cf.geekdo-images.com/CT_QevMqwgC1smCTYItecA__original/img/K2HPUhGtRpeFRSOVnkDcNEo-sWQ=/0x0/filters:format(jpeg)/pic7547388.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 90,
+    "rating": 7.0
+  },
+  {
+    "id": "352418",
+    "name": "Fliptown",
+    "year": 2023,
+    "thumbnail": "https://cf.geekdo-images.com/IeFNM8pY6qBIMRONuJ9Irg__small/img/uRBbKObz0E1-7K0o-ZulmLC1ayk=/fit-in/200x150/filters:strip_icc()/pic7318155.jpg",
+    "image": "https://cf.geekdo-images.com/IeFNM8pY6qBIMRONuJ9Irg__original/img/VovCirukPgK3modEBZx-f1tMsD8=/0x0/filters:format(jpeg)/pic7318155.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 45,
+    "rating": 7.7
+  },
+  {
+    "id": "334652",
+    "name": "Goblin Vaults",
+    "year": 2023,
+    "thumbnail": "https://cf.geekdo-images.com/GfHvFSX1DJWU70V5ryJpRg__small/img/rzRfukX5pT9LbQE0r2JbRGNKEoE=/fit-in/200x150/filters:strip_icc()/pic7404211.png",
+    "image": "https://cf.geekdo-images.com/GfHvFSX1DJWU70V5ryJpRg__original/img/D73nHi9e-Wz127fL39UuNCbI4MU=/0x0/filters:format(png)/pic7404211.png",
+    "minplayers": 1,
+    "maxplayers": 5,
+    "playingtime": 45,
+    "rating": 7.1
+  },
+  {
+    "id": "336131",
+    "name": "Halls of Hegra",
+    "year": 2023,
+    "thumbnail": "https://cf.geekdo-images.com/muJ3YmLTsyStKn60D9mcdw__small/img/OpjNfL1tDRbzO7B9RO5I4OiDC2k=/fit-in/200x150/filters:strip_icc()/pic6158972.jpg",
+    "image": "https://cf.geekdo-images.com/muJ3YmLTsyStKn60D9mcdw__original/img/2Kew2JZiGjIuwd87-5Xq8ylMCFQ=/0x0/filters:format(jpeg)/pic6158972.jpg",
+    "minplayers": 1,
+    "maxplayers": 1,
+    "playingtime": 90,
+    "rating": 8.1
+  },
+  {
+    "id": "367490",
+    "name": "Hickory Dickory",
+    "year": 2023,
+    "thumbnail": "https://cf.geekdo-images.com/wNPQex7ukUTDRO6WK1v0eA__small/img/tdOCFZkMaCFbBQGB1_Oz54QkNQY=/fit-in/200x150/filters:strip_icc()/pic6972966.jpg",
+    "image": "https://cf.geekdo-images.com/wNPQex7ukUTDRO6WK1v0eA__original/img/yhwfSa8UQV4c2g9nz-zfzGg8oOw=/0x0/filters:format(jpeg)/pic6972966.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 120,
+    "rating": 7.0
+  },
+  {
+    "id": "355224",
+    "name": "Isle of Trains: All Aboard",
+    "year": 2023,
+    "thumbnail": "https://cf.geekdo-images.com/XLetZJjJMO_EQkIYTyOfAw__small/img/5Hy5msbYsR0vuJlAcEExB7gpQpU=/fit-in/200x150/filters:strip_icc()/pic6652396.jpg",
+    "image": "https://cf.geekdo-images.com/XLetZJjJMO_EQkIYTyOfAw__original/img/UQQMJpxaYAkN7L62UPcUHg2uGAw=/0x0/filters:format(jpeg)/pic6652396.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 60,
+    "rating": 6.9
+  },
+  {
+    "id": "354934",
+    "name": "Legacy of Yu",
+    "year": 2023,
+    "thumbnail": "https://cf.geekdo-images.com/cVE1FZQR3gqdlAmehJpaBw__small/img/D52Pgq1xs7MNiDjkinf4VLGroxQ=/fit-in/200x150/filters:strip_icc()/pic6630422.png",
+    "image": "https://cf.geekdo-images.com/cVE1FZQR3gqdlAmehJpaBw__original/img/F5aSQaJkh-PKGpq7I7mGFn9YFhg=/0x0/filters:format(png)/pic6630422.png",
+    "minplayers": 1,
+    "maxplayers": 1,
+    "playingtime": 60,
+    "rating": 8.1
+  },
+  {
+    "id": "332070",
+    "name": "ONUS!: Traianus",
+    "year": 2023,
+    "thumbnail": "https://cf.geekdo-images.com/OZ-MN6mOH5dzODOL9FFrQQ__small/img/KqFtjkyqVeya3mucIoArHF67nEM=/fit-in/200x150/filters:strip_icc()/pic6590441.jpg",
+    "image": "https://cf.geekdo-images.com/OZ-MN6mOH5dzODOL9FFrQQ__original/img/JTzyjp-CJGmpoRGmBr_4Rn_bP-E=/0x0/filters:format(jpeg)/pic6590441.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 120,
+    "rating": 8.4
+  },
+  {
+    "id": "371942",
+    "name": "The White Castle",
+    "year": 2023,
+    "thumbnail": "https://cf.geekdo-images.com/qXT1U-nFh9PE8ujfdmI7dA__small/img/ru1l95gdKNXSsByDglE9Xxgu0kE=/fit-in/200x150/filters:strip_icc()/pic7754663.jpg",
+    "image": "https://cf.geekdo-images.com/qXT1U-nFh9PE8ujfdmI7dA__original/img/jzmifZJ0Sg2Js7hmQjzX7bEHVBY=/0x0/filters:format(jpeg)/pic7754663.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 80,
+    "rating": 8.0
+  },
+  {
+    "id": "360896",
+    "name": "Tiny Epic Vikings",
+    "year": 2023,
+    "thumbnail": "https://cf.geekdo-images.com/TozSb_5cxm3m8W-OZLDqGg__small/img/jWDKxil3vtg8LbQ7AXPflLiqf1k=/fit-in/200x150/filters:strip_icc()/pic6811526.jpg",
+    "image": "https://cf.geekdo-images.com/TozSb_5cxm3m8W-OZLDqGg__original/img/hBpuyrjoxY3I6RdVOaUKAkPfHOs=/0x0/filters:format(jpeg)/pic6811526.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 60,
+    "rating": 7.3
+  },
+  {
+    "id": "337627",
+    "name": "Voidfall",
+    "year": 2023,
+    "thumbnail": "https://cf.geekdo-images.com/hItZjdDTNuaCZ7fEztwcUQ__small/img/Ov6eWR87PZ2O1XYQtXMO6KvfzOg=/fit-in/200x150/filters:strip_icc()/pic6153324.jpg",
+    "image": "https://cf.geekdo-images.com/hItZjdDTNuaCZ7fEztwcUQ__original/img/gIhusTrYRr_2JQGEv0zuSgLtuUo=/0x0/filters:format(jpeg)/pic6153324.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 240,
+    "rating": 8.5
+  },
+  {
+    "id": "392449",
+    "name": "Welcome To...: Collector's Edition",
+    "year": 2023,
+    "thumbnail": "https://cf.geekdo-images.com/4SAnljGi7c_dgBaDYzE-eg__small/img/dler5NuMdW8YzhZr3MBRo1f-fX8=/fit-in/200x150/filters:strip_icc()/pic7612312.png",
+    "image": "https://cf.geekdo-images.com/4SAnljGi7c_dgBaDYzE-eg__original/img/OjXHmj05kZn2oQMZ8v7vUY2hlJo=/0x0/filters:format(png)/pic7612312.png",
+    "minplayers": 1,
+    "maxplayers": 6,
+    "playingtime": 25,
+    "rating": 8.3
+  },
+  {
+    "id": "383499",
+    "name": "Witchcraft!",
+    "year": 2023,
+    "thumbnail": "https://cf.geekdo-images.com/sfgo3BXIx9lE_OP1sOnzwA__small/img/R3D3u6uZQ2cUI8ehs3c-VxUzXy0=/fit-in/200x150/filters:strip_icc()/pic7442805.jpg",
+    "image": "https://cf.geekdo-images.com/sfgo3BXIx9lE_OP1sOnzwA__original/img/E-OtrtBF_62Eu47OExvuzEojt-I=/0x0/filters:format(jpeg)/pic7442805.jpg",
+    "minplayers": 1,
+    "maxplayers": 1,
+    "playingtime": 40,
+    "rating": 7.6
+  },
+  {
+    "id": "402024",
+    "name": "Conservas",
+    "year": 2024,
+    "thumbnail": "https://cf.geekdo-images.com/ShmrX5D3QG7RqG60HoNLIA__small/img/FIjh0MigQQjLRGg2rJ6GqKtGhTg=/fit-in/200x150/filters:strip_icc()/pic7884933.png",
+    "image": "https://cf.geekdo-images.com/ShmrX5D3QG7RqG60HoNLIA__original/img/YyReaGm9eE1CClEF5BFXBvyIxl0=/0x0/filters:format(png)/pic7884933.png",
+    "minplayers": 1,
+    "maxplayers": 1,
+    "playingtime": 40,
+    "rating": 7.4
+  },
+  {
+    "id": "385331",
+    "name": "Creature Caravan",
+    "year": 2024,
+    "thumbnail": "https://cf.geekdo-images.com/uNHX1bzPjFuSlJSTbTsEPA__small/img/p7BAc_ujUEaoC1gOUarNLojOprg=/fit-in/200x150/filters:strip_icc()/pic7497404.jpg",
+    "image": "https://cf.geekdo-images.com/uNHX1bzPjFuSlJSTbTsEPA__original/img/vj4wa1p5OMI_BrDGboXxiouspIE=/0x0/filters:format(jpeg)/pic7497404.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 90,
+    "rating": 7.8
+  },
+  {
+    "id": "373600",
+    "name": "Cthulhu: Death May Die – Fear of the Unknown",
+    "year": 2024,
+    "thumbnail": "https://cf.geekdo-images.com/asStsgtyfmFidfGwjrZv9A__small/img/EVA6tZOYp0nT1YZ95A4UmhObrBU=/fit-in/200x150/filters:strip_icc()/pic7155574.png",
+    "image": "https://cf.geekdo-images.com/asStsgtyfmFidfGwjrZv9A__original/img/OcWVltP0JuyjNaLLfd0dru16XtI=/0x0/filters:format(png)/pic7155574.png",
+    "minplayers": 1,
+    "maxplayers": 5,
+    "playingtime": 90,
+    "rating": 8.7
+  },
+  {
+    "id": "316704",
+    "name": "El Rey Planeta",
+    "year": 2024,
+    "thumbnail": "https://cf.geekdo-images.com/kqxPeqD68KBZ07I-QJ0d9g__small/img/tNiUj7-FTmy50x37FNYgh5SJIIc=/fit-in/200x150/filters:strip_icc()/pic8089952.jpg",
+    "image": "https://cf.geekdo-images.com/kqxPeqD68KBZ07I-QJ0d9g__original/img/qcFCLJslmg3IFDDFsa6vRo4xc_4=/0x0/filters:format(jpeg)/pic8089952.jpg",
+    "minplayers": 1,
+    "maxplayers": 2,
+    "playingtime": 240,
+    "rating": 8.2
+  },
+  {
+    "id": "367966",
+    "name": "Endeavor: Deep Sea",
+    "year": 2024,
+    "thumbnail": "https://cf.geekdo-images.com/wIbevITv9W79ELP8rEZoKA__small/img/7_DqsUgdrpbeLfkA2ko8bXhgpGw=/fit-in/200x150/filters:strip_icc()/pic6996584.jpg",
+    "image": "https://cf.geekdo-images.com/wIbevITv9W79ELP8rEZoKA__original/img/41fYEG_IYb9ECcCO24Dk4dZUNT0=/0x0/filters:format(jpeg)/pic6996584.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 120,
+    "rating": 8.2
+  },
+  {
+    "id": "401493",
+    "name": "FateFlip: Washed Ashore",
+    "year": 2024,
+    "thumbnail": "https://cf.geekdo-images.com/oTgvDzfCAANY-eMndLsy4g__small/img/A0H6ayIcH432JoKCkANMlx_K1G4=/fit-in/200x150/filters:strip_icc()/pic8080130.png",
+    "image": "https://cf.geekdo-images.com/oTgvDzfCAANY-eMndLsy4g__original/img/ukh6bkZUuYAVBBQfasWMQabRZwA=/0x0/filters:format(png)/pic8080130.png",
+    "minplayers": 1,
+    "maxplayers": 99,
+    "playingtime": 35,
+    "rating": 7.1
+  },
+  {
+    "id": "409693",
+    "name": "Flatiron",
+    "year": 2024,
+    "thumbnail": "https://cf.geekdo-images.com/E0bUTmRdbTwznjxvFHMxQQ__small/img/BIXJBbVR-Zz8NtgSBVort8F8Upg=/fit-in/200x150/filters:strip_icc()/pic7926037.jpg",
+    "image": "https://cf.geekdo-images.com/E0bUTmRdbTwznjxvFHMxQQ__original/img/k1CfR-yZemxKHcipYDBG2iF3rMA=/0x0/filters:format(jpeg)/pic7926037.jpg",
+    "minplayers": 1,
+    "maxplayers": 2,
+    "playingtime": 45,
+    "rating": 7.5
+  },
+  {
+    "id": "393672",
+    "name": "Gloomhaven: Buttons & Bugs",
+    "year": 2024,
+    "thumbnail": "https://cf.geekdo-images.com/Z6MMX39UEAZT3-f-DlnHsA__small/img/5Bf6oWIJTdHYpLAodTPqbDxh_Bc=/fit-in/200x150/filters:strip_icc()/pic8114705.jpg",
+    "image": "https://cf.geekdo-images.com/Z6MMX39UEAZT3-f-DlnHsA__original/img/0t6A_tOIToHUkrBkhd2vUKDfric=/0x0/filters:format(jpeg)/pic8114705.jpg",
+    "minplayers": 1,
+    "maxplayers": 1,
+    "playingtime": 20,
+    "rating": 7.5
+  },
+  {
+    "id": "414317",
+    "name": "Harmonies",
+    "year": 2024,
+    "thumbnail": "https://cf.geekdo-images.com/A_XP2_VN3ugyqPhezowB_w__small/img/ln5eKAzhse2PIHvWn7bu-jiW_uk=/fit-in/200x150/filters:strip_icc()/pic8026369.png",
+    "image": "https://cf.geekdo-images.com/A_XP2_VN3ugyqPhezowB_w__original/img/_Rv8lSr3fC1oDRkrQleQW2H2yCs=/0x0/filters:format(png)/pic8026369.png",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 45,
+    "rating": 8.0
+  },
+  {
+    "id": "417599",
+    "name": "Harmony",
+    "year": 2024,
+    "thumbnail": "https://cf.geekdo-images.com/gui9f7BhR0K8qxt9UgNBPQ__small/img/XqjQmng5hiMxwtyfzeJHo1R9mfk=/fit-in/200x150/filters:strip_icc()/pic8103779.jpg",
+    "image": "https://cf.geekdo-images.com/gui9f7BhR0K8qxt9UgNBPQ__original/img/7lPS_5dskRY1kGy88un6S0v1xVw=/0x0/filters:format(jpeg)/pic8103779.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 90,
+    "rating": 7.6
+  },
+  {
+    "id": "398887",
+    "name": "Hispania",
+    "year": 2024,
+    "thumbnail": "https://cf.geekdo-images.com/Rho5EHTE7Srdmtl1GrFqJg__small/img/N3B08AKXlsr8vWjPwaaoNNlv30c=/fit-in/200x150/filters:strip_icc()/pic7927851.jpg",
+    "image": "https://cf.geekdo-images.com/Rho5EHTE7Srdmtl1GrFqJg__original/img/5aUo5Sjuex3BK7Qt6MMmBEWMvTM=/0x0/filters:format(jpeg)/pic7927851.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 60,
+    "rating": 8.0
+  },
+  {
+    "id": "367518",
+    "name": "Imperium: Horizons",
+    "year": 2024,
+    "thumbnail": "https://cf.geekdo-images.com/RonhJsZOe0QOj-fzkgEf0g__small/img/FMrHdCcRlTrwgMlRXLq5pDONuVE=/fit-in/200x150/filters:strip_icc()/pic6993187.jpg",
+    "image": "https://cf.geekdo-images.com/RonhJsZOe0QOj-fzkgEf0g__original/img/DxjJMKLtdZzzDOaacaitwfkRLJU=/0x0/filters:format(jpeg)/pic6993187.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 160,
+    "rating": 8.5
+  },
+  {
+    "id": "358737",
+    "name": "Leviathan Wilds",
+    "year": 2024,
+    "thumbnail": "https://cf.geekdo-images.com/k_iHhr7ltGhj46u4oQ4YAQ__small/img/-YtdhfpOEJNDPIbJovPSjDMXgec=/fit-in/200x150/filters:strip_icc()/pic7976770.jpg",
+    "image": "https://cf.geekdo-images.com/k_iHhr7ltGhj46u4oQ4YAQ__original/img/qSlgK-1y9-AgtOAA86R9gt9XNaI=/0x0/filters:format(jpeg)/pic7976770.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 90,
+    "rating": 7.9
+  },
+  {
+    "id": "404431",
+    "name": "Men-Nefer",
+    "year": 2024,
+    "thumbnail": "https://cf.geekdo-images.com/hMkpLfORIUsMe4dHuuHPyg__small/img/jlC58ndBNtI6kTO61AwdUhBMgHQ=/fit-in/200x150/filters:strip_icc()/pic7984201.jpg",
+    "image": "https://cf.geekdo-images.com/hMkpLfORIUsMe4dHuuHPyg__original/img/JsUocrjmr10HEIh-Ii97DCIYUIM=/0x0/filters:format(jpeg)/pic7984201.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 120,
+    "rating": 8.2
+  },
+  {
+    "id": "415792",
+    "name": "Neko Syndicate",
+    "year": 2024,
+    "thumbnail": "https://cf.geekdo-images.com/BCIR6yORf7eVat2VzPtArQ__small/img/FJwizYyaKPH9-XWEBqUlkDtqSrU=/fit-in/200x150/filters:strip_icc()/pic8061612.jpg",
+    "image": "https://cf.geekdo-images.com/BCIR6yORf7eVat2VzPtArQ__original/img/HZYEIe0Y2sesmz3jUjlX-hCDCyI=/0x0/filters:format(jpeg)/pic8061612.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 40,
+    "rating": 7.3
+  },
+  {
+    "id": "387276",
+    "name": "Reforest",
+    "year": 2024,
+    "thumbnail": "https://cf.geekdo-images.com/so4xa-rIyWBy0L_iKcOGyw__small/img/Y9Unw8RjSpi1kNWoBYNhfy8CKNY=/fit-in/200x150/filters:strip_icc()/pic8077548.png",
+    "image": "https://cf.geekdo-images.com/so4xa-rIyWBy0L_iKcOGyw__original/img/cxAQfJbmkeSbZA3ENXxT4qeops0=/0x0/filters:format(png)/pic8077548.png",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 60,
+    "rating": 7.5
+  },
+  {
+    "id": "334931",
+    "name": "Robinson Crusoe: Adventures on the Cursed Island – Collector's Edition (Gamefound Edition)",
+    "year": 2024,
+    "thumbnail": "https://cf.geekdo-images.com/DnP80GbML1Xog6EetWb9fA__small/img/391B_HelHCACrnGcgTgbrboHpWA=/fit-in/200x150/filters:strip_icc()/pic6138366.jpg",
+    "image": "https://cf.geekdo-images.com/DnP80GbML1Xog6EetWb9fA__original/img/LdzWRfdzbbhkObNdL7R8Y2pezuw=/0x0/filters:format(jpeg)/pic6138366.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 120,
+    "rating": 7.4
+  },
+  {
+    "id": "422674",
+    "name": "Saltfjord",
+    "year": 2024,
+    "thumbnail": "https://cf.geekdo-images.com/yl84ULuBdp57YQ8E42B-iQ__small/img/qOgxJjlduQAIwaFb47tCkFSi89E=/fit-in/200x150/filters:strip_icc()/pic8257140.jpg",
+    "image": "https://cf.geekdo-images.com/yl84ULuBdp57YQ8E42B-iQ__original/img/UCLqtiTEf0QZlzokAWMHjKul01E=/0x0/filters:format(jpeg)/pic8257140.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 90,
+    "rating": 7.8
+  },
+  {
+    "id": "402663",
+    "name": "Salton Sea",
+    "year": 2024,
+    "thumbnail": "https://cf.geekdo-images.com/pP4AVa3WNYvn2nWpE-Q6xw__small/img/dXEMvFFhoIj3QkSoK4YTCbAsJEo=/fit-in/200x150/filters:strip_icc()/pic7821718.png",
+    "image": "https://cf.geekdo-images.com/pP4AVa3WNYvn2nWpE-Q6xw__original/img/tpe4k2kqT9AD0G7Y36Na0tHvgYI=/0x0/filters:format(png)/pic7821718.png",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 120,
+    "rating": 7.4
+  },
+  {
+    "id": "338960",
+    "name": "Slay the Spire: The Board Game",
+    "year": 2024,
+    "thumbnail": "https://cf.geekdo-images.com/PQzVclEoOQ_wr4e1V86kxA__small/img/cpmsSDagE5RvQ1ERXl-fMJIaUUg=/fit-in/200x150/filters:strip_icc()/pic8157856.png",
+    "image": "https://cf.geekdo-images.com/PQzVclEoOQ_wr4e1V86kxA__original/img/KXOf1hP1cIJQLabKhZulWP-e9wI=/0x0/filters:format(png)/pic8157856.png",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 150,
+    "rating": 8.6
+  },
+  {
+    "id": "387514",
+    "name": "Stonespine Architects",
+    "year": 2024,
+    "thumbnail": "https://cf.geekdo-images.com/reyY-4k4eJ55CPd_2CXCKA__small/img/AJOu9-jfFi9twauiJQoI2_u4pPQ=/fit-in/200x150/filters:strip_icc()/pic7985356.jpg",
+    "image": "https://cf.geekdo-images.com/reyY-4k4eJ55CPd_2CXCKA__original/img/63t67q02KWS4QXA_0HYymanKuxs=/0x0/filters:format(jpeg)/pic7985356.jpg",
+    "minplayers": 1,
+    "maxplayers": 5,
+    "playingtime": 60,
+    "rating": 7.4
+  },
+  {
+    "id": "425560",
+    "name": "Strange World Above the Clouds",
+    "year": 2024,
+    "thumbnail": "https://cf.geekdo-images.com/qwkSjd41H1VBfnsux1igkg__small/img/_IDjOAvCk662JbExANqdfdUyo_c=/fit-in/200x150/filters:strip_icc()/pic8389733.jpg",
+    "image": "https://cf.geekdo-images.com/qwkSjd41H1VBfnsux1igkg__original/img/JjdPVnSnbQJHemInVNcqKmGIHf0=/0x0/filters:format(jpeg)/pic8389733.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 20,
+    "rating": 7.3
+  },
+  {
+    "id": "378117",
+    "name": "The Last Lighthouse",
+    "year": 2024,
+    "thumbnail": "https://cf.geekdo-images.com/_Reifl4-lWnuepxut_b6uw__small/img/TRjtsKU5PJydxx-pkfhjvSTKiuw=/fit-in/200x150/filters:strip_icc()/pic7803070.png",
+    "image": "https://cf.geekdo-images.com/_Reifl4-lWnuepxut_b6uw__original/img/ViLM_TpaVpSp_mxEiGj1Ee0WR3k=/0x0/filters:format(png)/pic7803070.png",
+    "minplayers": 1,
+    "maxplayers": 1,
+    "playingtime": 20,
+    "rating": 7.3
+  },
+  {
+    "id": "362917",
+    "name": "The Other Side of the Hill",
+    "year": 2024,
+    "thumbnail": "https://cf.geekdo-images.com/YzBglo08QXDTfo3ul9_mLg__small/img/UGoGj7Z4pebxf8-isSQzpjVaPSI=/fit-in/200x150/filters:strip_icc()/pic7899408.jpg",
+    "image": "https://cf.geekdo-images.com/YzBglo08QXDTfo3ul9_mLg__original/img/vadCv0zXtodxpOMEmV6NVbjbE4E=/0x0/filters:format(jpeg)/pic7899408.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 720,
+    "rating": 8.0
+  },
+  {
+    "id": "329500",
+    "name": "Unconscious Mind",
+    "year": 2024,
+    "thumbnail": "https://cf.geekdo-images.com/ufkAbhulnKJ7uDpi09TXOQ__small/img/XBP7p0D1bkzDXkoOuXSiavW26Ig=/fit-in/200x150/filters:strip_icc()/pic7127448.jpg",
+    "image": "https://cf.geekdo-images.com/ufkAbhulnKJ7uDpi09TXOQ__original/img/hhBc0bcNj9U3t-4trByrjrO8-ro=/0x0/filters:format(jpeg)/pic7127448.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 120,
+    "rating": 7.9
+  },
+  {
+    "id": "447174",
+    "name": "A Wild Venture",
+    "year": 2025,
+    "thumbnail": "https://cf.geekdo-images.com/TMMfAqvZP3g4HdgYyCpHPQ__small/img/nXwfLcmGgg99f-O3guvB2vXMM2Q=/fit-in/200x150/filters:strip_icc()/pic8920149.png",
+    "image": "https://cf.geekdo-images.com/TMMfAqvZP3g4HdgYyCpHPQ__original/img/d5oJDK7GyI5udbJ7SdtnstdrfFc=/0x0/filters:format(png)/pic8920149.png",
+    "minplayers": 2,
+    "maxplayers": 2,
+    "playingtime": 60,
+    "rating": 7.9
+  },
+  {
+    "id": "448435",
+    "name": "Adamastor",
+    "year": 2025,
+    "thumbnail": "https://cf.geekdo-images.com/3dNXZLcP2L0rp9XnMm-HkA__small/img/7O8sT8-ddhYrvCEgka0RBeavIlg=/fit-in/200x150/filters:strip_icc()/pic8967591.jpg",
+    "image": "https://cf.geekdo-images.com/3dNXZLcP2L0rp9XnMm-HkA__original/img/OYpDCXInmt3AKgb-pq22okP9HHo=/0x0/filters:format(jpeg)/pic8967591.jpg",
+    "minplayers": 1,
+    "maxplayers": 1,
+    "playingtime": 30,
+    "rating": 7.8
+  },
+  {
+    "id": "435648",
+    "name": "FateFlip: By Royal Decree",
+    "year": 2025,
+    "thumbnail": "https://cf.geekdo-images.com/Z_QVbYWmA4KEp6ayl8v7cw__small/img/zaRHI8QLM-JqxBCzBB3jb116ln8=/fit-in/200x150/filters:strip_icc()/pic8609423.png",
+    "image": "https://cf.geekdo-images.com/Z_QVbYWmA4KEp6ayl8v7cw__original/img/dEqgAaTj4dH94Q3OPyQvohRWw_E=/0x0/filters:format(png)/pic8609423.png",
+    "minplayers": 1,
+    "maxplayers": 99,
+    "playingtime": 35,
+    "rating": 7.3
+  },
+  {
+    "id": "426355",
+    "name": "Onoda",
+    "year": 2025,
+    "thumbnail": "https://cf.geekdo-images.com/o8ovlWyHpGi_KoFnco4PlQ__small/img/p04PxM8Ay_jEPFce3cwEaSIX_dE=/fit-in/200x150/filters:strip_icc()/pic8355133.jpg",
+    "image": "https://cf.geekdo-images.com/o8ovlWyHpGi_KoFnco4PlQ__original/img/rFf3FYCwRpJIF8HBzQ4XLS4Vx8s=/0x0/filters:format(jpeg)/pic8355133.jpg",
+    "minplayers": 1,
+    "maxplayers": 1,
+    "playingtime": 25,
+    "rating": 7.0
+  },
+  {
+    "id": "449957",
+    "name": "Valpiedra: Descensus ad tenebras",
+    "year": 2025,
+    "thumbnail": "https://cf.geekdo-images.com/AODWgy0WAmr35HUflyzBaw__small/img/fEqDpq0Uu4c_hugwznKWHVmijVk=/fit-in/200x150/filters:strip_icc()/pic8982516.jpg",
+    "image": "https://cf.geekdo-images.com/AODWgy0WAmr35HUflyzBaw__original/img/M2YExUEayjjkR3dLT-morFNJgoo=/0x0/filters:format(jpeg)/pic8982516.jpg",
+    "minplayers": 1,
+    "maxplayers": 4,
+    "playingtime": 60,
+    "rating": 8.0
+  }
+];
+      
+      // State Management
+      let currentView = 'grid'; // 'grid' or 'list'
+      let activeQuickFilter = 'all';
+      
+      // DOM Elements
+      const searchInput = document.getElementById('search-input');
+      const sortSelect = document.getElementById('sort-select');
+      const playersSelect = document.getElementById('players-select');
+      const viewToggleBtn = document.getElementById('view-toggle');
+      const viewToggleIcon = document.getElementById('view-toggle-icon');
+      const viewToggleText = document.getElementById('view-toggle-text');
+      const gamesContainer = document.getElementById('games-container');
+      const showingSummary = document.getElementById('showing-summary');
+      const tagButtons = document.querySelectorAll('.filter-tag');
+
+      // Stats Elements
+      const statTotalGames = document.getElementById('stat-total-games');
+      const statTimeline = document.getElementById('stat-timeline');
+      const statAvgRating = document.getElementById('stat-avg-rating');
+      const statSoloFriendly = document.getElementById('stat-solo-friendly');
+
+      // Initial Setup
+      function init() {
+        // Set up global stats once based on whole collection
+        calculateGlobalStats();
+        
+        // Initial render
+        renderGames();
+        
+        // Listeners
+        searchInput.addEventListener('input', renderGames);
+        sortSelect.addEventListener('change', renderGames);
+        playersSelect.addEventListener('change', renderGames);
+        
+        // View Toggle Listener
+        viewToggleBtn.addEventListener('click', () => {
+          if (currentView === 'grid') {
+            currentView = 'list';
+            gamesContainer.className = 'games-list-view';
+            viewToggleIcon.textContent = '㗊';
+            viewToggleText.textContent = 'Vista Cuadrícula';
+          } else {
+            currentView = 'grid';
+            gamesContainer.className = 'games-grid';
+            viewToggleIcon.textContent = '▤';
+            viewToggleText.textContent = 'Vista Lista';
+          }
+          renderGames();
+        });
+
+        // Quick Tag filters
+        tagButtons.forEach(btn => {
+          btn.addEventListener('click', () => {
+            tagButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            activeQuickFilter = btn.getAttribute('data-filter');
+            renderGames();
+          });
+        });
+      }
+
+      // Calculate global stats of entire collection
+      function calculateGlobalStats() {
+        if (gamesData.length === 0) return;
+        
+        statTotalGames.textContent = gamesData.length;
+        
+        // Timeline calculation
+        const years = gamesData.map(g => g.year).filter(y => y > 0);
+        if (years.length > 0) {
+          const minYear = Math.min(...years);
+          const maxYear = Math.max(...years);
+          statTimeline.textContent = `${minYear} - ${maxYear}`;
+        } else {
+          statTimeline.textContent = 'N/A';
+        }
+        
+        // Average BGG rating
+        const ratings = gamesData.map(g => g.rating).filter(r => r > 0);
+        if (ratings.length > 0) {
+          const avg = ratings.reduce((sum, val) => sum + val, 0) / ratings.length;
+          statAvgRating.textContent = avg.toFixed(1);
+        } else {
+          statAvgRating.textContent = 'N/A';
+        }
+        
+        // Solo playable
+        const soloGames = gamesData.filter(g => g.minplayers <= 1).length;
+        statSoloFriendly.textContent = soloGames;
+      }
+
+      // Filter, Sort and Render Games
+      function renderGames() {
+        let filtered = [...gamesData];
+        
+        // 1. Search Query filter
+        const query = searchInput.value.toLowerCase().trim();
+        if (query) {
+          filtered = filtered.filter(g => g.name.toLowerCase().includes(query));
+        }
+        
+        // 2. Players Filter
+        const playerCount = playersSelect.value;
+        if (playerCount !== 'all') {
+          const count = parseInt(playerCount);
+          if (count === 4) {
+            filtered = filtered.filter(g => g.maxplayers >= 4);
+          } else {
+            filtered = filtered.filter(g => g.minplayers <= count && g.maxplayers >= count);
+          }
+        }
+
+        // 3. Quick Tag Filters
+        if (activeQuickFilter !== 'all') {
+          if (activeQuickFilter === 'solo') {
+            filtered = filtered.filter(g => g.minplayers <= 1);
+          } else if (activeQuickFilter === 'highly-rated') {
+            filtered = filtered.filter(g => g.rating >= 7.8);
+          } else if (activeQuickFilter === 'classic') {
+            filtered = filtered.filter(g => g.year > 0 && g.year < 2010);
+          } else if (activeQuickFilter === 'modern') {
+            filtered = filtered.filter(g => g.year >= 2020);
+          } else if (activeQuickFilter === 'short') {
+            filtered = filtered.filter(g => g.playingtime > 0 && g.playingtime <= 45);
+          } else if (activeQuickFilter === 'long') {
+            filtered = filtered.filter(g => g.playingtime >= 90);
+          }
+        }
+
+        // 4. Sorting
+        const sortBy = sortSelect.value;
+        if (sortBy === 'year-asc') {
+          filtered.sort((a, b) => a.year - b.year || a.name.localeCompare(b.name));
+        } else if (sortBy === 'year-desc') {
+          filtered.sort((a, b) => b.year - a.year || a.name.localeCompare(b.name));
+        } else if (sortBy === 'name-asc') {
+          filtered.sort((a, b) => a.name.localeCompare(b.name));
+        } else if (sortBy === 'name-desc') {
+          filtered.sort((a, b) => b.name.localeCompare(a.name));
+        } else if (sortBy === 'rating-desc') {
+          filtered.sort((a, b) => b.rating - a.rating || a.name.localeCompare(b.name));
+        }
+
+        // 5. Render HTML
+        showingSummary.innerHTML = `Mostrando <strong>${filtered.length}</strong> de <strong>${gamesData.length}</strong> juegos`;
+        
+        if (filtered.length === 0) {
+          gamesContainer.innerHTML = `
+            <div class="empty-state">
+              <h3>No se encontraron juegos</h3>
+              <p>Prueba a cambiar tus filtros o la búsqueda.</p>
+            </div>
+          `;
+          return;
+        }
+
+        gamesContainer.innerHTML = filtered.map(game => {
+          // Rating class
+          let ratingClass = 'rating-poor';
+          if (game.rating >= 8.0) ratingClass = 'rating-high';
+          else if (game.rating >= 7.0) ratingClass = 'rating-medium';
+          else if (game.rating >= 6.0) ratingClass = 'rating-low';
+
+          // Format players spec
+          let playersSpec = '';
+          if (game.minplayers === game.maxplayers) {
+            playersSpec = `${game.minplayers} jugador${game.minplayers > 1 ? 'es' : ''}`;
+          } else {
+            playersSpec = `${game.minplayers}-${game.maxplayers} jugadores`;
+          }
+          if (game.minplayers <= 1) {
+            playersSpec = `👥 Solo (${playersSpec})`;
+          } else {
+            playersSpec = `👥 ${playersSpec}`;
+          }
+
+          // Image src
+          const thumbnail = game.thumbnail || 'https://placehold.co/150x150/1e293b/cbd5e1?text=No+Art';
+
+          return `
+            <article class="game-card">
+              <div class="game-img-container">
+                <img class="game-img" src="${thumbnail}" alt="${htmlEscape(game.name)}" loading="lazy" />
+                <span class="year-badge">${game.year > 0 ? game.year : 'N/A'}</span>
+                <span class="rating-badge ${ratingClass}">⭐ ${game.rating.toFixed(1)}</span>
+              </div>
+              <div class="game-details">
+                <h3 class="game-title" title="${htmlEscape(game.name)}">${htmlEscape(game.name)}</h3>
+                <div class="game-specs">
+                  <div class="spec-item">
+                    <span class="spec-icon">${game.minplayers <= 1 ? '👤' : '👥'}</span>
+                    <span>${playersSpec}</span>
+                  </div>
+                  <div class="spec-item">
+                    <span class="spec-icon">⏱️</span>
+                    <span>${game.playingtime > 0 ? game.playingtime + ' minutos' : 'Tiempo desconocido'}</span>
+                  </div>
+                </div>
+              </div>
+            </article>
+          `;
+        }).join('');
+      }
+
+      // Quick helper to escape HTML inside dynamic string interpolation
+      function htmlEscape(str) {
+        return str
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      // Launch on DOM Content Load
+      document.addEventListener('DOMContentLoaded', init);
+    </script>
   </body>
 </html>
