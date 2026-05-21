@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BGG Dashboard - pezhammer</title>
     
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="https://boardgamegeek.com/favicon.ico">
+    
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -3182,7 +3185,7 @@
           const thumbnail = game.thumbnail || 'https://placehold.co/150x150/1e293b/cbd5e1?text=No+Art';
 
           return `
-            <a href="https://boardgamegeek.com/boardgame/${game.id}" target="_blank" class="game-card" title="Ver en BoardGameGeek">
+            <a href="https://boardgamegeek.com/boardgame/${game.id}"class="game-card" title="Ver en BoardGameGeek">
               <div class="game-img-container">
                 <img class="game-img" src="${thumbnail}" alt="${htmlEscape(game.name)}" loading="lazy" />
                 <span class="year-badge">${game.year > 0 ? game.year : 'N/A'}</span>
