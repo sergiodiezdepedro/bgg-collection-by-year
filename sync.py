@@ -554,6 +554,8 @@ def get_html_template(games_json_str, username):
         position: relative;
         transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s, box-shadow 0.35s;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        text-decoration: none;
+        color: inherit;
       }}
 
       .game-card:hover {{
@@ -1141,7 +1143,7 @@ def get_html_template(games_json_str, username):
           const thumbnail = game.thumbnail || 'https://placehold.co/150x150/1e293b/cbd5e1?text=No+Art';
 
           return `
-            <article class="game-card">
+            <a href="https://boardgamegeek.com/boardgame/${{game.id}}" target="_blank" class="game-card" title="Ver en BoardGameGeek">
               <div class="game-img-container">
                 <img class="game-img" src="${{thumbnail}}" alt="${{htmlEscape(game.name)}}" loading="lazy" />
                 <span class="year-badge">${{game.year > 0 ? game.year : 'N/A'}}</span>
@@ -1160,7 +1162,7 @@ def get_html_template(games_json_str, username):
                   </div>
                 </div>
               </div>
-            </article>
+            </a>
           `;
         }}).join('');
       }}
