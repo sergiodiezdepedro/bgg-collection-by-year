@@ -800,6 +800,10 @@ def get_html_template(games_json_str, username):
         color: var(--accent-teal);
         font-weight: 500;
       }}
+
+      footer a {{
+        color: var(--accent-teal);
+      }}
     </style>
   </head>
 
@@ -901,7 +905,7 @@ def get_html_template(games_json_str, username):
     </div>
 
     <footer>
-      Generado automáticamente a partir del XML de BoardGameGeek. Diseñado con <strong>Aesthetics Premium</strong>.
+      Generado automáticamente a partir del XML de BoardGameGeek. Diseñado por <strong><a href="https://pezhammer.wordpress.com/">pezhammer</a> + IA</strong>.
     </footer>
 
     <!-- Injected Game Data -->
