@@ -304,6 +304,7 @@ def get_html_template(games_json_str, username):
         margin-bottom: 8px;
         background: linear-gradient(to right, #0dd3c5, #a78bfa);
         -webkit-background-clip: text;
+        background-clip: text;
         -webkit-text-fill-color: transparent;
       }}
 
@@ -658,6 +659,7 @@ def get_html_template(games_json_str, username):
         line-height: 1.3;
         display: -webkit-box;
         -webkit-line-clamp: 2;
+        line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
         height: 2.6rem;
@@ -721,7 +723,11 @@ def get_html_template(games_json_str, username):
         margin-bottom: 0;
         height: auto;
         max-width: 40%;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
         -webkit-line-clamp: 1;
+        line-clamp: 1;
+        overflow: hidden;
         font-size: 1.15rem;
       }}
 
