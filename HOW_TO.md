@@ -10,12 +10,10 @@ https://boardgamegeek.com/xmlapi2/collection?username=pezhammer&subtype=boardgam
 
 **[Haz clic aquí para descargar](https://boardgamegeek.com/xmlapi2/collection?username=pezhammer&subtype=boardgame&excludesubtype=boardgameexpansion&stats=1&own=1)**
 
----
-
 ## Pasos de Descarga
 
 1. **Abre la URL en tu navegador** (Chrome, Safari, Firefox, etc.)
-2. El navegador **descargará automáticamente** un archivo llamado `collection.xml`
+2. **Copia todo el contenido** de la ventana y guárdalo con el nombre `collection.xml`
 3. **Guarda el archivo** en la carpeta del proyecto:
    ```
    /Users/pezhammer/Desarrollo/A-E/bgg-collection-by-year/
@@ -26,8 +24,6 @@ https://boardgamegeek.com/xmlapi2/collection?username=pezhammer&subtype=boardgam
    ```
 5. ✅ Se generará automáticamente el archivo `index.html` con tu dashboard interactivo
 
----
-
 ## Qué incluye esta descarga
 
 ✓ Todos tus juegos de mesa base (sin expansiones)  
@@ -36,8 +32,6 @@ https://boardgamegeek.com/xmlapi2/collection?username=pezhammer&subtype=boardgam
 ✓ Tiempo de juego  
 ✓ Imágenes de portada  
 ✓ Año de publicación
-
----
 
 ## Parámetros de la URL
 
@@ -51,6 +45,4 @@ https://boardgamegeek.com/xmlapi2/collection?username=pezhammer&subtype=boardgam
 
 Si necesitas modificar la consulta (ej: incluir expansiones, otro usuario), actualiza el archivo `peticion_BGG_xml_juegos_base_by_year.txt` con la nueva URL.
 
----
-
-**Última actualización:** 21 de mayo de 2026
+**Última actualización:** 29 de mayo de 2026
