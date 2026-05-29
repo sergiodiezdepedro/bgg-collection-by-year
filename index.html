@@ -15,6 +15,7 @@
     
     <style>
       :root {
+        /* Dark Theme (Default) */
         --bg-color: #080c14;
         --card-bg: #121826;
         --card-border: #1e293b;
@@ -25,6 +26,24 @@
         --text-secondary: #94a3b8;
         --glass-bg: rgba(18, 24, 38, 0.7);
         --glass-border: rgba(255, 255, 255, 0.05);
+        --input-bg: rgba(255, 255, 255, 0.03);
+        --input-border: rgba(255, 255, 255, 0.08);
+      }
+
+      body.light-theme {
+        /* Light Theme */
+        --bg-color: #f8fafc;
+        --card-bg: #ffffff;
+        --card-border: #e2e8f0;
+        --card-hover-border: #7c3aed;
+        --accent-purple: #7c3aed;
+        --accent-teal: #0d9488;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --glass-bg: rgba(248, 250, 252, 0.7);
+        --glass-border: rgba(0, 0, 0, 0.08);
+        --input-bg: rgba(0, 0, 0, 0.03);
+        --input-border: rgba(0, 0, 0, 0.08);
       }
 
       * {
@@ -44,6 +63,13 @@
         padding-bottom: 50px;
         line-height: 1.5;
         overflow-x: hidden;
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+
+      body.light-theme {
+        background-image: 
+          radial-gradient(at 0% 0%, rgba(13, 148, 136, 0.08) 0px, transparent 40%),
+          radial-gradient(at 100% 100%, rgba(124, 58, 237, 0.08) 0px, transparent 40%);
       }
 
       /* Custom scrollbar */
@@ -51,14 +77,14 @@
         width: 8px;
       }
       ::-webkit-scrollbar-track {
-        background: #080c14;
+        background: var(--bg-color);
       }
       ::-webkit-scrollbar-thumb {
-        background: #1e293b;
+        background: var(--card-border);
         border-radius: 4px;
       }
       ::-webkit-scrollbar-thumb:hover {
-        background: #7c3aed;
+        background: var(--accent-purple);
       }
 
       header {
@@ -67,6 +93,10 @@
         text-align: center;
         background: linear-gradient(180deg, rgba(18, 24, 38, 0.8) 0%, transparent 100%);
         border-bottom: 1px solid var(--glass-border);
+      }
+
+      body.light-theme header {
+        background: linear-gradient(180deg, rgba(248, 250, 252, 0.8) 0%, transparent 100%);
       }
 
       header h1 {
@@ -200,8 +230,8 @@
       .search-input {
         width: 100%;
         padding: 12px 12px 12px 42px;
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
         border-radius: 12px;
         color: var(--text-primary);
         font-family: inherit;
@@ -217,8 +247,8 @@
 
       .select-input {
         padding: 12px;
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
         border-radius: 12px;
         color: var(--text-primary);
         font-family: inherit;
@@ -235,7 +265,7 @@
       }
 
       .select-input option {
-        background: #111827;
+        background: var(--card-bg);
         color: var(--text-primary);
       }
 
@@ -255,8 +285,8 @@
 
       .filter-tag {
         padding: 6px 14px;
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
         border-radius: 20px;
         color: var(--text-secondary);
         font-size: 0.85rem;
@@ -270,6 +300,10 @@
         color: var(--text-primary);
       }
 
+      body.light-theme .filter-tag:hover {
+        background: rgba(0, 0, 0, 0.08);
+      }
+
       .filter-tag.active {
         background: linear-gradient(135deg, var(--accent-purple), #9061f9);
         border-color: var(--accent-purple);
@@ -278,8 +312,8 @@
       }
 
       .view-toggle-btn {
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
         color: var(--text-secondary);
         padding: 12px 18px;
         border-radius: 12px;
@@ -294,6 +328,31 @@
       }
 
       .view-toggle-btn:hover {
+        border-color: var(--text-secondary);
+        color: var(--text-primary);
+      }
+
+      /* Theme Toggle Button */
+      .theme-toggle-btn {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
+        color: var(--text-secondary);
+        padding: 10px 14px;
+        border-radius: 12px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: inherit;
+        font-size: 0.95rem;
+        font-weight: 500;
+        transition: all 0.3s;
+      }
+
+      .theme-toggle-btn:hover {
         border-color: var(--text-secondary);
         color: var(--text-primary);
       }
@@ -350,7 +409,11 @@
         justify-content: center;
         position: relative;
         overflow: hidden;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        border-bottom: 1px solid var(--glass-border);
+      }
+
+      body.light-theme .game-img-container {
+        background: #f0f4f8;
       }
 
       .game-img {
@@ -638,6 +701,7 @@
 
   <body>
     <header>
+      <button id="theme-toggle" class="theme-toggle-btn" aria-label="Cambiar tema">🌙 Oscuro</button>
       <h1>Colección BGG de <strong>pezhammer</strong></h1>
       <p>Juegos de mesa base organizados de forma interactiva</p>
     </header>
@@ -1566,7 +1630,7 @@
     "minplayers": 1,
     "maxplayers": 4,
     "playingtime": 90,
-    "rating": 7.3
+    "rating": 7.2
   },
   {
     "id": "216600",
@@ -1998,6 +2062,17 @@
     "rating": 7.1
   },
   {
+    "id": "334011",
+    "name": "A Gentle Rain",
+    "year": 2021,
+    "thumbnail": "https://cf.geekdo-images.com/EqqXUmjIuGspHNwt1UnDEQ__small/img/qKGfLe9Y83j2-UEzfRy1bIbNosI=/fit-in/200x150/filters:strip_icc()/pic7769466.png",
+    "image": "https://cf.geekdo-images.com/EqqXUmjIuGspHNwt1UnDEQ__original/img/zROVukvZZ-GZR2Rm8JfzLOzGKnE=/0x0/filters:format(png)/pic7769466.png",
+    "minplayers": 1,
+    "maxplayers": 1,
+    "playingtime": 15,
+    "rating": 7.6
+  },
+  {
     "id": "314088",
     "name": "Agropolis",
     "year": 2021,
@@ -2182,7 +2257,7 @@
     "minplayers": 1,
     "maxplayers": 1,
     "playingtime": 60,
-    "rating": 6.7
+    "rating": 6.8
   },
   {
     "id": "255984",
@@ -2226,7 +2301,7 @@
     "minplayers": 2,
     "maxplayers": 2,
     "playingtime": 45,
-    "rating": 7.3
+    "rating": 7.2
   },
   {
     "id": "325810",
@@ -2545,7 +2620,7 @@
     "minplayers": 1,
     "maxplayers": 4,
     "playingtime": 90,
-    "rating": 7.0
+    "rating": 6.9
   },
   {
     "id": "352418",
@@ -2601,6 +2676,17 @@
     "maxplayers": 4,
     "playingtime": 60,
     "rating": 6.9
+  },
+  {
+    "id": "391795",
+    "name": "Kinfire Delve: Vainglory's Grotto",
+    "year": 2023,
+    "thumbnail": "https://cf.geekdo-images.com/io5dPH2ImA5uqoLsO7K1GA__small/img/P613Xg4KWA4NO5KE4-ZOBqboTys=/fit-in/200x150/filters:strip_icc()/pic7570975.jpg",
+    "image": "https://cf.geekdo-images.com/io5dPH2ImA5uqoLsO7K1GA__original/img/YSHX304i8sCqhyvW6wk9Xy8Y1go=/0x0/filters:format(jpeg)/pic7570975.jpg",
+    "minplayers": 1,
+    "maxplayers": 2,
+    "playingtime": 60,
+    "rating": 7.9
   },
   {
     "id": "354934",
@@ -3032,8 +3118,38 @@
       const statAvgRating = document.getElementById('stat-avg-rating');
       const statSoloFriendly = document.getElementById('stat-solo-friendly');
 
+      // Theme Toggle
+      const themeToggleBtn = document.getElementById('theme-toggle');
+
+      // Theme Management Functions
+      function loadTheme() {
+        const savedTheme = localStorage.getItem('bgg-theme') || 'dark';
+        applyTheme(savedTheme);
+      }
+
+      function applyTheme(theme) {
+        if (theme === 'light') {
+          document.body.classList.add('light-theme');
+          themeToggleBtn.textContent = '☀️ Claro';
+          localStorage.setItem('bgg-theme', 'light');
+        } else {
+          document.body.classList.remove('light-theme');
+          themeToggleBtn.textContent = '🌙 Oscuro';
+          localStorage.setItem('bgg-theme', 'dark');
+        }
+      }
+
+      function toggleTheme() {
+        const currentTheme = localStorage.getItem('bgg-theme') || 'dark';
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        applyTheme(newTheme);
+      }
+
       // Initial Setup
       function init() {
+        // Load saved theme preference
+        loadTheme();
+        
         // Set up global stats once based on whole collection
         calculateGlobalStats();
         
@@ -3044,6 +3160,9 @@
         searchInput.addEventListener('input', renderGames);
         sortSelect.addEventListener('change', renderGames);
         playersSelect.addEventListener('change', renderGames);
+        
+        // Theme toggle
+        themeToggleBtn.addEventListener('click', toggleTheme);
         
         // View Toggle Listener
         viewToggleBtn.addEventListener('click', () => {

@@ -243,6 +243,7 @@ def get_html_template(games_json_str, username):
     
     <style>
       :root {{
+        /* Dark Theme (Default) */
         --bg-color: #080c14;
         --card-bg: #121826;
         --card-border: #1e293b;
@@ -253,6 +254,24 @@ def get_html_template(games_json_str, username):
         --text-secondary: #94a3b8;
         --glass-bg: rgba(18, 24, 38, 0.7);
         --glass-border: rgba(255, 255, 255, 0.05);
+        --input-bg: rgba(255, 255, 255, 0.03);
+        --input-border: rgba(255, 255, 255, 0.08);
+      }}
+
+      body.light-theme {{
+        /* Light Theme */
+        --bg-color: #f8fafc;
+        --card-bg: #ffffff;
+        --card-border: #e2e8f0;
+        --card-hover-border: #7c3aed;
+        --accent-purple: #7c3aed;
+        --accent-teal: #0d9488;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --glass-bg: rgba(248, 250, 252, 0.7);
+        --glass-border: rgba(0, 0, 0, 0.08);
+        --input-bg: rgba(0, 0, 0, 0.03);
+        --input-border: rgba(0, 0, 0, 0.08);
       }}
 
       * {{
@@ -272,6 +291,13 @@ def get_html_template(games_json_str, username):
         padding-bottom: 50px;
         line-height: 1.5;
         overflow-x: hidden;
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }}
+
+      body.light-theme {{
+        background-image: 
+          radial-gradient(at 0% 0%, rgba(13, 148, 136, 0.08) 0px, transparent 40%),
+          radial-gradient(at 100% 100%, rgba(124, 58, 237, 0.08) 0px, transparent 40%);
       }}
 
       /* Custom scrollbar */
@@ -279,14 +305,14 @@ def get_html_template(games_json_str, username):
         width: 8px;
       }}
       ::-webkit-scrollbar-track {{
-        background: #080c14;
+        background: var(--bg-color);
       }}
       ::-webkit-scrollbar-thumb {{
-        background: #1e293b;
+        background: var(--card-border);
         border-radius: 4px;
       }}
       ::-webkit-scrollbar-thumb:hover {{
-        background: #7c3aed;
+        background: var(--accent-purple);
       }}
 
       header {{
@@ -295,6 +321,10 @@ def get_html_template(games_json_str, username):
         text-align: center;
         background: linear-gradient(180deg, rgba(18, 24, 38, 0.8) 0%, transparent 100%);
         border-bottom: 1px solid var(--glass-border);
+      }}
+
+      body.light-theme header {{
+        background: linear-gradient(180deg, rgba(248, 250, 252, 0.8) 0%, transparent 100%);
       }}
 
       header h1 {{
@@ -428,8 +458,8 @@ def get_html_template(games_json_str, username):
       .search-input {{
         width: 100%;
         padding: 12px 12px 12px 42px;
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
         border-radius: 12px;
         color: var(--text-primary);
         font-family: inherit;
@@ -445,8 +475,8 @@ def get_html_template(games_json_str, username):
 
       .select-input {{
         padding: 12px;
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
         border-radius: 12px;
         color: var(--text-primary);
         font-family: inherit;
@@ -463,7 +493,7 @@ def get_html_template(games_json_str, username):
       }}
 
       .select-input option {{
-        background: #111827;
+        background: var(--card-bg);
         color: var(--text-primary);
       }}
 
@@ -483,8 +513,8 @@ def get_html_template(games_json_str, username):
 
       .filter-tag {{
         padding: 6px 14px;
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
         border-radius: 20px;
         color: var(--text-secondary);
         font-size: 0.85rem;
@@ -498,6 +528,10 @@ def get_html_template(games_json_str, username):
         color: var(--text-primary);
       }}
 
+      body.light-theme .filter-tag:hover {{
+        background: rgba(0, 0, 0, 0.08);
+      }}
+
       .filter-tag.active {{
         background: linear-gradient(135deg, var(--accent-purple), #9061f9);
         border-color: var(--accent-purple);
@@ -506,8 +540,8 @@ def get_html_template(games_json_str, username):
       }}
 
       .view-toggle-btn {{
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
         color: var(--text-secondary);
         padding: 12px 18px;
         border-radius: 12px;
@@ -522,6 +556,31 @@ def get_html_template(games_json_str, username):
       }}
 
       .view-toggle-btn:hover {{
+        border-color: var(--text-secondary);
+        color: var(--text-primary);
+      }}
+
+      /* Theme Toggle Button */
+      .theme-toggle-btn {{
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
+        color: var(--text-secondary);
+        padding: 10px 14px;
+        border-radius: 12px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: inherit;
+        font-size: 0.95rem;
+        font-weight: 500;
+        transition: all 0.3s;
+      }}
+
+      .theme-toggle-btn:hover {{
         border-color: var(--text-secondary);
         color: var(--text-primary);
       }}
@@ -578,7 +637,11 @@ def get_html_template(games_json_str, username):
         justify-content: center;
         position: relative;
         overflow: hidden;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        border-bottom: 1px solid var(--glass-border);
+      }}
+
+      body.light-theme .game-img-container {{
+        background: #f0f4f8;
       }}
 
       .game-img {{
@@ -866,6 +929,7 @@ def get_html_template(games_json_str, username):
 
   <body>
     <header>
+      <button id="theme-toggle" class="theme-toggle-btn" aria-label="Cambiar tema">🌙 Oscuro</button>
       <h1>Colección BGG de <strong>{html.escape(username)}</strong></h1>
       <p>Juegos de mesa base organizados de forma interactiva</p>
     </header>
@@ -993,8 +1057,38 @@ def get_html_template(games_json_str, username):
       const statAvgRating = document.getElementById('stat-avg-rating');
       const statSoloFriendly = document.getElementById('stat-solo-friendly');
 
+      // Theme Toggle
+      const themeToggleBtn = document.getElementById('theme-toggle');
+
+      // Theme Management Functions
+      function loadTheme() {{
+        const savedTheme = localStorage.getItem('bgg-theme') || 'dark';
+        applyTheme(savedTheme);
+      }}
+
+      function applyTheme(theme) {{
+        if (theme === 'light') {{
+          document.body.classList.add('light-theme');
+          themeToggleBtn.textContent = '☀️ Claro';
+          localStorage.setItem('bgg-theme', 'light');
+        }} else {{
+          document.body.classList.remove('light-theme');
+          themeToggleBtn.textContent = '🌙 Oscuro';
+          localStorage.setItem('bgg-theme', 'dark');
+        }}
+      }}
+
+      function toggleTheme() {{
+        const currentTheme = localStorage.getItem('bgg-theme') || 'dark';
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        applyTheme(newTheme);
+      }}
+
       // Initial Setup
       function init() {{
+        // Load saved theme preference
+        loadTheme();
+        
         // Set up global stats once based on whole collection
         calculateGlobalStats();
         
@@ -1005,6 +1099,9 @@ def get_html_template(games_json_str, username):
         searchInput.addEventListener('input', renderGames);
         sortSelect.addEventListener('change', renderGames);
         playersSelect.addEventListener('change', renderGames);
+        
+        // Theme toggle
+        themeToggleBtn.addEventListener('click', toggleTheme);
         
         // View Toggle Listener
         viewToggleBtn.addEventListener('click', () => {{
