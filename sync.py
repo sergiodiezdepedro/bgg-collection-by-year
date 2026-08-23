@@ -9,6 +9,7 @@ from html.parser import HTMLParser
 import json
 import html
 import re
+from datetime import datetime
 
 # Configuration
 URL_FILE_PATH = "peticion_BGG_xml_juegos_base_by_year.txt"
@@ -226,6 +227,12 @@ def parse_games(xml_content):
 
 def get_html_template(games_json_str, username):
     """Returns the visual index.html template injected with the parsed JSON string."""
+    month_names = (
+        "enero", "febrero", "marzo", "abril", "mayo", "junio",
+        "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+    )
+    generated_at = datetime.now()
+    generated_date = f"{generated_at.day} de {month_names[generated_at.month - 1]} de {generated_at.year}"
     return f"""<!doctype html>
 <html lang="es">
   <head>
@@ -879,6 +886,10 @@ def get_html_template(games_json_str, username):
         color: var(--accent-teal);
       }}
 
+      .footer-date {{
+        margin-top: 16px;
+      }}
+
       /* Scroll to Top Button */
       #scroll-to-top {{
         position: fixed;
@@ -1027,6 +1038,7 @@ def get_html_template(games_json_str, username):
 
     <footer>
       Generado automáticamente a partir del XML de BoardGameGeek. Diseñado por <strong><a href="https://pezhammer.wordpress.com/">pezhammer</a> + IA</strong>.
+      <div class="footer-date">Página generada el día {generated_date}.</div>
     </footer>
 
     <!-- Scroll to Top Button -->
