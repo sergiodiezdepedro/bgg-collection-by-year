@@ -246,7 +246,7 @@ def get_html_template(games_json_str, username):
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bree+Serif&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
       :root {{
@@ -336,8 +336,9 @@ def get_html_template(games_json_str, username):
 
       header h1 {{
         font-size: 2.8rem;
-        font-weight: 800;
-        letter-spacing: -0.05em;
+        font-family: 'Windsor', 'Bree Serif', Georgia, serif;
+        font-weight: 400;
+        letter-spacing: 0;
         margin-bottom: 8px;
         background: linear-gradient(to right, #0dd3c5, #a78bfa);
         -webkit-background-clip: text;
