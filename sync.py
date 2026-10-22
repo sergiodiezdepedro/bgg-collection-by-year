@@ -1163,7 +1163,7 @@ def get_html_template(games_json_str, username):
         const ratings = gamesData.map(g => g.rating).filter(r => r > 0);
         if (ratings.length > 0) {{
           const avg = ratings.reduce((sum, val) => sum + val, 0) / ratings.length;
-          statAvgRating.textContent = avg.toFixed(1);
+          statAvgRating.textContent = avg.toLocaleString('es-ES', {{ minimumFractionDigits: 1, maximumFractionDigits: 1 }});
         }} else {{
           statAvgRating.textContent = 'N/A';
         }}
@@ -1266,7 +1266,7 @@ def get_html_template(games_json_str, username):
               <div class="game-img-container">
                 <img class="game-img" src="${{thumbnail}}" alt="${{htmlEscape(game.name)}}" loading="lazy" />
                 <span class="year-badge">${{game.year > 0 ? game.year : 'N/A'}}</span>
-                <span class="rating-badge ${{ratingClass}}">⭐ ${{game.rating.toFixed(1)}}</span>
+                <span class="rating-badge ${{ratingClass}}">⭐ ${{game.rating.toLocaleString('es-ES', {{ minimumFractionDigits: 1, maximumFractionDigits: 1 }})}}</span>
               </div>
               <div class="game-details">
                 <h3 class="game-title" title="${{htmlEscape(game.name)}}">${{htmlEscape(game.name)}}</h3>
